@@ -51,6 +51,12 @@ class testquestion_controller {
     /** @var object The options. */
     protected $options;
 
+    /**
+     * Constructor.
+     *
+     * @param \stdClass $question The question's information.
+     * @param object $context the context object for the question being reported on.
+     */
     public function __construct($question, $context) {
         $this->question = $question;
         $this->testresponses = testquestion_responses::create_for_question($question);
@@ -63,6 +69,11 @@ class testquestion_controller {
         $this->responsestable->is_downloading('');
     }
 
+    /**
+     * Handle the option display of the form.
+     *
+     * @return string The HTML to display the options form.
+     */
     public function handle_display_options_form(): string {
         // Handle any options form submission.
         if ($fromform = $this->optionsform->get_data()) {
@@ -75,6 +86,11 @@ class testquestion_controller {
         return $this->optionsform->render();
     }
 
+    /**
+     * Handle the responses table of the form.
+     *
+     * @return void
+     */
     public function handle_responses_table_form(): void {
         // Handle any attempts form submission.
         $this->process_response_table_actions($this->options->get_url());
@@ -93,6 +109,8 @@ class testquestion_controller {
 
     /**
      * Process the results of the form.
+     *
+     * @param string $redirecturl The URL to redirect to.
      * @return void.
      */
     protected function process_response_table_actions($redirecturl) {
@@ -119,6 +137,13 @@ class testquestion_controller {
         }
     }
 
+    /**
+     * Print the grading responses progress bar.
+     *
+     * @param array $responseids Array of response ids
+     * @return void
+     * @throws \coding_exception
+     */
     protected function print_grading_responses_progressbar($responseids) {
         $responses = \qtype_pmatch\testquestion_responses::get_responses_by_ids($responseids);
         $pbar = new \progress_bar('testingquestion', 500, true);

@@ -28,13 +28,20 @@ class qtype_pmatch_generator extends component_generator_base {
      */
     protected $responsecount = 0;
 
-    public function reset() {
+    /**
+     * Reset the generator state.
+     *
+     * @return void
+     */
+    public function reset(): void {
         $this->responsecount = 0;
     }
 
     /**
      * Create a new test response.
-     * @param array|stdClass $record
+     *
+     * @param array|stdClass $record The record to create.
+     * @param stdClass $question The question to create the response for.
      * @return stdClass qtype_pmatch_test_responses record.
      */
     public function create_test_response($record = null, $question = null) {
@@ -46,7 +53,7 @@ class qtype_pmatch_generator extends component_generator_base {
             'response' => 'Test response ' . $this->responsecount,
             'questionid' => $question ? $question->id : 0,
             'expectedfraction' => null,
-            'gradedfraction' => null
+            'gradedfraction' => null,
         ];
 
         $record = $this->datagenerator->combine_defaults_and_record($defaults, $record);

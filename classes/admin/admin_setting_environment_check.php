@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-
 /**
  * Admin settings class for chosing a spell-checker back-end.
  *
@@ -45,6 +44,8 @@ class qtype_pmatch_admin_setting_environment_check extends \admin_setting_headin
     /**
      * Returns an HTML string
      *
+     * @param mixed $data array or string depending on setting
+     * @param string $query query string
      * @return string Returns an HTML string
      */
     public function output_html($data, $query = '') {

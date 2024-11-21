@@ -24,6 +24,14 @@ use qtype_pmatch\local\spell\qtype_pmatch_spell_checker;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class qtype_pmatch_renderer extends qtype_renderer {
+    /**
+     * {@inheritDoc}
+     *
+     * @param question_attempt $qa the question attempt to display.
+     * @param question_display_options $options controls what should and should not be displayed.
+     * @return string HTML fragment.
+     * @throws coding_exception
+     */
     public function formulation_and_controls(question_attempt $qa, question_display_options $options) {
 
         /** @var qtype_pmatch_question $question */
@@ -100,7 +108,7 @@ class qtype_pmatch_renderer extends qtype_renderer {
         } else {
             $inputattributes = [
                 'type' => 'text',
-                'value' => $currentanswer
+                'value' => $currentanswer,
             ];
             $inputattributes['size'] = $cols;
             $input = html_writer::empty_tag('input', $inputattributes + $attributes) . $feedbackimg;
@@ -166,7 +174,7 @@ class qtype_pmatch_renderer extends qtype_renderer {
         qtype_pmatch_question $question,
         question_display_options $options,
         string $resetbuttonid,
-        string $inputname,
+        string $inputname
     ): string {
         if ($options->readonly || !$question->responsetemplate) {
             return '';
@@ -189,6 +197,12 @@ class qtype_pmatch_renderer extends qtype_renderer {
         );
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param question_attempt $qa The question attempt.
+     * @return string The feedback.
+     */
     public function specific_feedback(question_attempt $qa) {
         /** @var qtype_pmatch_question $question */
         $question = $qa->get_question();
@@ -202,14 +216,21 @@ class qtype_pmatch_renderer extends qtype_renderer {
                 $qa, 'question', 'answerfeedback', $answer->id);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param question_attempt $qa the question attempt to display.
+     * @return string The correct response.
+     */
     public function correct_response(question_attempt $qa) {
         return '';
     }
 
     /**
      * Displays a link to run the question tests, if applicable.
-     * @param qtype_pmatch_question $question
-     * @param question_display_options $options
+     *
+     * @param qtype_pmatch_question $question the question object.
+     * @param question_display_options $options the display options.
      * @return string HTML fragment.
      */
     public function question_tests_link(qtype_pmatch_question $question, question_display_options $options) {
@@ -227,12 +248,27 @@ class qtype_pmatch_renderer extends qtype_renderer {
         return html_writer::tag('div', $link, ['class' => 'questiontestslink']);
     }
 
-    public function back_to_test_question_link($qid) {
+    /**
+     * Get the link to go back to the test question page.
+     *
+     * @param int $qid The question id.
+     * @return string
+     * @throws \core\exception\moodle_exception
+     * @throws coding_exception
+     */
+    public function back_to_test_question_link(int $qid) {
         return html_writer::tag('p', html_writer::link(
                 new moodle_url('/question/type/pmatch/testquestion.php', ['id' => $qid]),
                 get_string('testquestionbacklink', 'qtype_pmatch')));
     }
 
+    /**
+     * Display feedback for the question.
+     *
+     * @param string $feedback The feedback to display.
+     * @return string The feedback HTML.
+     * @throws coding_exception
+     */
     public function display_feedback($feedback) {
         $html = html_writer::tag('p', html_writer::div(
                     get_string('savedxresponses', 'qtype_pmatch', ($feedback->saved))));

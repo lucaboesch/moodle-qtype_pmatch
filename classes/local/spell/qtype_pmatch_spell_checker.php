@@ -102,7 +102,7 @@ abstract class qtype_pmatch_spell_checker {
     }
 
     /**
-     * Helper method used by {@link make()} when a real dictionary can't be found.
+     * Helper method used by {@see make()} when a real dictionary can't be found.
      * @param string $lang a language code.
      * @return qtype_pmatch_null_spell_checker
      */
@@ -112,6 +112,8 @@ abstract class qtype_pmatch_spell_checker {
     }
 
     /**
+     * Get the list of all the back-end library classes.
+     *
      * @return array a list of all the back-end library classes.
      */
     public static function get_known_backends() {
@@ -123,6 +125,8 @@ abstract class qtype_pmatch_spell_checker {
     }
 
     /**
+     * Get the list of the back-end library classes that might work on this server.
+     *
      * @return array a list of the back-end library classes that might work on this server.
      */
     public static function get_installed_backends() {
@@ -160,7 +164,7 @@ abstract class qtype_pmatch_spell_checker {
     /**
      * This method only exists to support pspell. Pspell cannot tell us if the
      * required dictionary exists until we have tried to create it.
-     * @return boolean whether this class was initialised correctly.
+     * @return bool whether this class was initialised correctly.
      */
     public function is_initialised() {
         return true;

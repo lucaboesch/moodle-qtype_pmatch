@@ -36,8 +36,8 @@ require_once($CFG->dirroot . '/question/type/pmatch/pmatchlib.php');
  *
  * @covers \pmatch_parsed_string
  */
-class parsed_string_test extends \basic_testcase {
-    public function test_pmatch_parse_string() {
+final class parsed_string_test extends \basic_testcase {
+    public function test_pmatch_parse_string(): void {
         $options = new pmatch_options();
 
         $parsedstring = new pmatch_parsed_string('abc.def', $options);
@@ -82,7 +82,13 @@ class parsed_string_test extends \basic_testcase {
         $this->assertEquals(['Test?'], $parsedstring->get_words());
     }
 
-    public function pmatch_spelling_testcases(): array {
+    /**
+     * Test cases for test_pmatch_parse_string
+     *
+     * @return array[] The test cases
+     * @throws \coding_exception
+     */
+    public static function pmatch_spelling_testcases(): array {
         return [
             [[], 'e.g. tool'],                         // Default extra dictionary word & normal word.
             [[], 'e.g.. tool.'],                       // Trailing punctuation is skipped.
@@ -92,11 +98,11 @@ class parsed_string_test extends \basic_testcase {
             [['awerawefaw'], 'awerawefaw, test'],      // Not a word. Punctuation stripped.
             [['AweRaweFaw'], 'AweRaweFaw, Test'],      // Original capitalisation kept.
             [[], 'e.g. tool. queek queek abcde fghij', // Synonyms automatically OK.
-                    pmatch_options::make(['synonyms' => ['queek' => 'abcde|fghij']])],
+                    pmatch_options::make(['synonyms' => ['queek' => 'abcde|fghij']]), ],
             [[], 'queeking',                           // Synonyms may include * wild card.
-                    pmatch_options::make(['synonyms' => ['queek*' => 'abcde|fghij']])],
+                    pmatch_options::make(['synonyms' => ['queek*' => 'abcde|fghij']]), ],
             [['queenking'], 'queenking',
-                    pmatch_options::make(['synonyms' => ['queek*' => 'abcde|fghij']])],
+                    pmatch_options::make(['synonyms' => ['queek*' => 'abcde|fghij']]), ],
             [[], 'Frog-toad'],                         // Any hyphenated group of real words is fine.
             [[], '"Frog-toad"'],                       // Even if surrounded.
             [['Frog"-"toad'], '"Frog"-"toad"'],        // But not if the bits have extra punctuation.
@@ -104,22 +110,24 @@ class parsed_string_test extends \basic_testcase {
             [[], 'Milton Keynes'],                     // Proper nouns are OK.
             [['keynes'], 'keynes'],                    // But only if capitalised correctly.
             [[], "J'aime visiter Nice",                // French example.
-                    pmatch_options::make(['lang' => 'fr'])],
+                    pmatch_options::make(['lang' => 'fr']), ],
             [['nice'], "J'aime visiter nice",          // But only if capitalised correctly.
-                    pmatch_options::make(['lang' => 'fr'])],
+                    pmatch_options::make(['lang' => 'fr']), ],
             [[], 'FBI'],                               // Acronym.
             [['fbi'], 'fbi'],                          // That must be upper-case.
         ];
     }
 
     /**
+     * Test spelling
+     *
      * @dataProvider pmatch_spelling_testcases
      *
-     * @param array $misspelledwords
-     * @param $string
-     * @param null $options
+     * @param array $misspelledwords List of misspelled words
+     * @param string $string String to test
+     * @param array|pmatch_options|null $options Options, array or pmatch_options
      */
-    public function test_pmatch_spelling(array $misspelledwords, $string, $options = null) {
+    public function test_pmatch_spelling(array $misspelledwords, string $string, array|pmatch_options|null $options = null): void {
         if ($options === null) {
             $options = new pmatch_options();
         }
@@ -167,7 +175,7 @@ class parsed_string_test extends \basic_testcase {
      *
      * @return array Dataset
      */
-    public function get_display_name_for_language_code_provider(): array {
+    public static function get_display_name_for_language_code_provider(): array {
         return [
                 ['en_US', 'English', 'English (en_US)'],
                 ['en_GB', 'English', 'English (en_GB)'],
@@ -177,7 +185,7 @@ class parsed_string_test extends \basic_testcase {
                 ['es_BO', 'Spanish; Castilian', 'Spanish; Castilian (es_BO)'],
                 ['fr_BE', 'French', 'French (fr_BE)'],
                 ['fr_CA', 'French', 'French (fr_CA)'],
-                ['fr_CH', 'French', 'French (fr_CH)']
+                ['fr_CH', 'French', 'French (fr_CH)'],
         ];
     }
 
@@ -201,14 +209,14 @@ class parsed_string_test extends \basic_testcase {
      *
      * @return array Dataset
      */
-    public function get_default_spell_check_dictionary_provider(): array {
+    public static function get_default_spell_check_dictionary_provider(): array {
         return [
             ['en', ['en', 'en_US', 'en_GB'], 'en'],
             ['en', ['en_US', 'en_GB'], 'en_GB'],
             ['fr', ['fr', 'fr_FR'], 'fr'],
             ['fr', ['fr_FR'], 'fr_FR'],
             ['fr', ['fr_FR'], 'fr_FR'],
-            ['de', ['de_AT', 'de_CH'], 'de_AT']
+            ['de', ['de_AT', 'de_CH'], 'de_AT'],
         ];
     }
 }

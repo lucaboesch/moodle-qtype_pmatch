@@ -8,17 +8,20 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - php: '8.1'
-            moodle-branch: 'master'
+          - php: '8.3'
+            moodle-branch: 'MOODLE_405_STABLE'
+            database: 'mariadb'
+          - php: '8.2'
+            moodle-branch: 'MOODLE_404_STABLE'
             database: 'pgsql'
-          - php: '8.0'
-            moodle-branch: 'MOODLE_402_STABLE'
+          - php: '8.1'
+            moodle-branch: 'MOODLE_403_STABLE'
             database: 'mariadb'
           - php: '8.0'
-            moodle-branch: 'MOODLE_401_STABLE'
+            moodle-branch: 'MOODLE_402_STABLE'
             database: 'pgsql'
           - php: '7.4'
-            moodle-branch: 'MOODLE_400_STABLE'
+            moodle-branch: 'MOODLE_401_STABLE'
             database: 'mariadb'
 
     services:
@@ -36,7 +39,7 @@ jobs:
           - 5432:5432
 
       mariadb:
-        image: mariadb:10
+        image: mariadb:10.6
         env:
           MYSQL_USER: 'root'
           MYSQL_ALLOW_EMPTY_PASSWORD: "true"
@@ -48,7 +51,7 @@ jobs:
 
     steps:
       - name: Check out out repository code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           path: plugin
 
@@ -62,7 +65,7 @@ jobs:
 
       - name: Initialise moodle-plugin-ci
         run: |
-          composer create-project -n --no-dev --prefer-dist moodlehq/moodle-plugin-ci ci ^3
+          composer create-project -n --no-dev --prefer-dist moodlehq/moodle-plugin-ci ci ^4
           echo $(cd ci/bin; pwd) >> $GITHUB_PATH
           echo $(cd ci/vendor/bin; pwd) >> $GITHUB_PATH
           sudo locale-gen en_AU.UTF-8
@@ -80,10 +83,6 @@ jobs:
         if: ${{ always() }}
         run: moodle-plugin-ci phplint
 
-      - name: PHP Copy/Paste Detector
-        if: ${{ always() }}
-        run: moodle-plugin-ci phpcpd
-
       - name: PHP Mess Detector
         if: ${{ always() }}
         run: moodle-plugin-ci phpmd
@@ -93,7 +92,6 @@ jobs:
         run: moodle-plugin-ci codechecker --max-warnings 0
 
       - name: Moodle PHPDoc Checker
-        continue-on-error: true # This step will show errors but will not fail.
         if: ${{ always() }}
         run: moodle-plugin-ci phpdoc
 

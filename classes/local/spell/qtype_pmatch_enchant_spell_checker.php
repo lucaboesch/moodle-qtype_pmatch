@@ -17,7 +17,7 @@
 namespace qtype_pmatch\local\spell;
 
 /**
- * Implements the {@link qtype_pmatch_spell_checker} API using the Enchant PHP API.
+ * Implements the {@see qtype_pmatch_spell_checker} API using the Enchant PHP API.
  *
  * @package qtype_pmatch
  * @copyright 2019 The Open University
@@ -31,6 +31,12 @@ class qtype_pmatch_enchant_spell_checker extends qtype_pmatch_spell_checker {
     /** @var resource the enchant dictionary. */
     protected $dictionary = null;
 
+    /**
+     * {@inheritdoc}
+     *
+     * @param string $lang The language code.
+     * @throws \coding_exception
+     */
     public function __construct($lang) {
         parent::__construct($lang);
 
@@ -42,6 +48,9 @@ class qtype_pmatch_enchant_spell_checker extends qtype_pmatch_spell_checker {
         $this->dictionary = enchant_broker_request_dict($broker, $lang);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function __destruct() {
         if ($this->dictionary && PHP_MAJOR_VERSION <= 7) {
             // phpcs:ignore
@@ -49,14 +58,32 @@ class qtype_pmatch_enchant_spell_checker extends qtype_pmatch_spell_checker {
         }
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @param string $word The word to check.
+     * @return bool whether the word is in the dictionary.
+     */
     public function is_in_dictionary($word) {
         return enchant_dict_check($this->dictionary, $word);
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @return string translated name of this back-end, for use in the UI.
+     * @return \lang_string|string
+     * @throws \coding_exception
+     */
     public static function get_name() {
         return get_string('spellcheckerenchant', 'qtype_pmatch');
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @return bool whether the necessary libraries are installed for this back-end to work.
+     */
     public static function is_available() {
         if (!function_exists('enchant_broker_init')) {
             return false;
@@ -65,11 +92,18 @@ class qtype_pmatch_enchant_spell_checker extends qtype_pmatch_spell_checker {
         return (bool) self::get_broker();
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @return bool whether this class was initialised correctly.
+     */
     public function is_initialised() {
         return (bool) $this->dictionary;
     }
 
     /**
+     * Get the Enchant broker.
+     *
      * @return a broker.
      */
     protected static function get_broker() {

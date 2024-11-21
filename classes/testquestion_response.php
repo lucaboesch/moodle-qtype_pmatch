@@ -54,7 +54,7 @@ class testquestion_response {
 
     /**
      * Create an instance of this class representing an empty test response.
-     * @param $response \stdClass data object to translate into a test_response class
+     * @param \stdClass $response data object to translate into a test_response class
      * @return testquestion_response
      */
     public static function create($response = null) {
@@ -79,6 +79,12 @@ class testquestion_response {
         return $testresponse;
     }
 
+    /**
+     * Set the gradedfraction to a value.
+     *
+     * @param float $value The value to set the gradedfraction to.
+     * @return void
+     */
     public function set_gradedfraction($value) {
         $this->gradedfraction = round($value);
     }

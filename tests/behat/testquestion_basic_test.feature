@@ -21,6 +21,8 @@ Feature: Basic test of the question testing tool
       | questioncategory | qtype    | name         | template |
       | Test questions   | pmatch   | My first pattern match question | listen    |
     And the default question test responses exist for question "My first pattern match question"
+    And the following config values are set as admin:
+      | enableasyncbackup | 0 |
 
   @javascript
   Scenario: Navigate to the Test this question page from preview
@@ -185,3 +187,4 @@ Feature: Basic test of the question testing tool
     And I should see "Marked correctly: 7 (54%)"
     And I should see "Computed mark greater than human mark: 0 (missed positive)"
     And I should see "Computed mark less than human mark: 5 (missed negative)"
+

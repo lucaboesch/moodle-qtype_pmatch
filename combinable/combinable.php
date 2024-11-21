@@ -32,18 +32,39 @@ use qtype_pmatch\form_utils;
 
 require_once($CFG->dirroot.'/question/type/pmatch/pmatchlib.php');
 
+/**
+ * Class to represent a combined combinable pmatch question type
+ */
 class qtype_combined_combinable_type_pmatch extends qtype_combined_combinable_type_base {
 
+    /**
+     * @var string The identifier for the question type.
+     */
     protected $identifier = 'pmatch';
 
+    /**
+     * Get the question extra properties.
+     *
+     * @return string[] The extra properties.
+     */
     protected function extra_question_properties() {
         return ['forcelength' => '0'];
     }
 
+    /**
+     * Get the answer extra properties.
+     *
+     * @return array The extra properties.
+     */
     protected function extra_answer_properties() {
         return ['fraction' => '1', 'feedback' => ['text' => '', 'format' => FORMAT_PLAIN]];
     }
 
+    /**
+     * Get the subquestion form fragment question option fields.
+     *
+     * @return array The subquestion form fragment question option fields.
+     */
     public function subq_form_fragment_question_option_fields() {
         return [
             'allowsubscript' => null,
@@ -55,22 +76,31 @@ class qtype_combined_combinable_type_pmatch extends qtype_combined_combinable_ty
             'converttospace' => ',;:',
             'modelanswer' => '',
             'responsetemplate' => '',
-            'synonymsdata' => []
+            'synonymsdata' => [],
         ];
     }
 
+    /**
+     * Get the third parameter for the default question text.
+     *
+     * @return string The third parameter for the default question text.
+     */
     protected function third_param_for_default_question_text() {
         return QTYPE_PMATCH_DEFAULT_PLACEHOLDER_SIZE;
     }
 }
 
-
+/**
+ * Class to represent a combined combinable pmatch question
+ */
 class qtype_combined_combinable_pmatch extends qtype_combined_combinable_text_entry {
 
     /**
-     * @param moodleform      $combinedform
-     * @param MoodleQuickForm $mform
-     * @param                 $repeatenabled
+     * Add the form fragment for the pmatch question type.
+     *
+     * @param moodleform $combinedform The combined form.
+     * @param MoodleQuickForm $mform The moodle quick form.
+     * @param bool $repeatenabled whether the repeat is enabled.
      * @return mixed
      */
     public function add_form_fragment(moodleform $combinedform, MoodleQuickForm $mform, $repeatenabled) {
@@ -175,6 +205,13 @@ class qtype_combined_combinable_pmatch extends qtype_combined_combinable_text_en
         $this->js_call();
     }
 
+    /**
+     * Convert the data to the form.
+     *
+     * @param context $context The context.
+     * @param array $fileoptions The file options.
+     * @return array|array[] The form.
+     */
     public function data_to_form($context, $fileoptions) {
         $answers = ['answer' => []];
         if ($this->questionrec !== null) {
@@ -198,7 +235,12 @@ class qtype_combined_combinable_pmatch extends qtype_combined_combinable_text_en
         return $data;
     }
 
-
+    /**
+     * Validate the form data.
+     *
+     * @return array The errors.
+     * @throws coding_exception
+     */
     public function validate() {
         $errors = [];
 
@@ -235,6 +277,11 @@ class qtype_combined_combinable_pmatch extends qtype_combined_combinable_text_en
         return $errors;
     }
 
+    /**
+     * Get the sup/sub editor option.
+     *
+     * @return string|null
+     */
     public function get_sup_sub_editor_option() {
         if ($this->question->allowsubscript && $this->question->allowsuperscript) {
             return 'both';
@@ -247,12 +294,19 @@ class qtype_combined_combinable_pmatch extends qtype_combined_combinable_text_en
         }
     }
 
+    /**
+     * Get whether the question has submitted data.
+     *
+     * @return bool whether the question has submitted data.
+     */
     public function has_submitted_data() {
         return $this->submitted_data_array_not_empty('answer') || parent::has_submitted_data();
     }
 
     /**
      * Perform the needed JS setup for this question type.
+     *
+     * @return void
      */
     public function js_call(): void {
         global $PAGE;

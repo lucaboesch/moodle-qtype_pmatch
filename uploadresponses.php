@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-
 /**
  * This script allows an author to upload a .csv file listing marked test responses to a question.
  * The responses are graded using the current rules and rule matches are recorded.
@@ -41,6 +40,12 @@ require_once($CFG->dirroot . '/question/type/pmatch/lib.php');
  * The upload form.
  */
 class upload_form extends moodleform {
+    /**
+     * Override function definition for custom form definition of moodle form
+     *
+     * @return void
+     * @throws coding_exception
+     */
     protected function definition() {
         $this->_form->addElement('header', 'header',
                 get_string('testquestionformheader', 'qtype_pmatch'));

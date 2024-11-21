@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-
 /**
  * This file contains the API for accessing pmatch expression interpreter and matcher.
  *
@@ -41,7 +40,7 @@ if (extension_loaded('xdebug')) {
  */
 class pmatch_options {
 
-    /** @var boolean */
+    /** @var bool */
     public $ignorecase = false;
 
     /** @var string of sentence divider characters. */
@@ -99,6 +98,12 @@ class pmatch_options {
         return $options;
     }
 
+    /**
+     * Set the synonyms.
+     *
+     * @param array $synonyms The synonyms to set.
+     * @return void
+     */
     public function set_synonyms($synonyms) {
         foreach ($synonyms as $synonym) {
             $synonym->word = $this->unicode_normalisation($synonym->word);
@@ -121,11 +126,24 @@ class pmatch_options {
         }
     }
 
+    /**
+     * Set extra dictionary words.
+     *
+     * @param string $wordlist The list of words to add to the dictionary.
+     * @return void
+     */
     public function set_extra_dictionary_words($wordlist) {
         $wordlist = $this->unicode_normalisation($wordlist);
         $this->extradictionarywords = preg_split('~\s+~', $wordlist);
     }
 
+    /**
+     * Normalise a string that may contain unicode characters.
+     *
+     * @param string $unicodestring A string that may contain unicode characters.
+     * @return false|mixed|string
+     * @throws coding_exception
+     */
     public function unicode_normalisation($unicodestring) {
         static $errorlogged = false;
         if (class_exists('Normalizer')) {
@@ -140,6 +158,11 @@ class pmatch_options {
         }
     }
 
+    /**
+     * Get the patterns to match words that should be ignored.
+     *
+     * @return array The patterns to match words that should be ignored.
+     */
     public function words_to_ignore_patterns() {
         $words = array_merge($this->extradictionarywords, $this->nospellcheckwords);
         $wordpatterns = [PMATCH_NUMBER];
@@ -157,6 +180,8 @@ class pmatch_options {
     }
 
     /**
+     * Get the sentence separator pattern.
+     *
      * @return string fragment of preg_match pattern to match sentence separator.
      */
     public function sentence_divider_pattern() {
@@ -164,8 +189,10 @@ class pmatch_options {
     }
 
     /**
+     * Get whether the fragment contains the sentence divider.
+     *
      * @param string $word fragment of preg_match pattern to match sentence separator.
-     * @return bool wether $words ends in one of the sentence divider characters.
+     * @return bool whether $words ends in one of the sentence divider characters.
      */
     public function word_has_sentence_divider_suffix($word) {
         $sd = $this->sentence_divider_pattern();
@@ -173,8 +200,8 @@ class pmatch_options {
     }
 
     /**
-     *
      * Strip one and only one sentence divider from the end of a string.
+     *
      * @param string $string
      * @return string with sentence divider stripped off.
      */
@@ -185,14 +212,29 @@ class pmatch_options {
         return $string;
     }
 
+    /**
+     * Get the word divider pattern.
+     *
+     * @return string The word divider pattern.
+     */
     public function word_divider_pattern() {
         return $this->pattern_to_match_any_of($this->worddividers . $this->converttospace);
     }
 
+    /**
+     * Get the pattern to match any of the characters in the string.
+     *
+     * @return string The pattern to match any of the characters in the string.
+     */
     public function character_in_word_pattern() {
         return PMATCH_CHARACTER.'|'.PMATCH_SPECIAL_CHARACTER;
     }
 
+    /**
+     * Get the pattern options to use when matching.
+     *
+     * @return string The pattern options to use when matching.
+     */
     public function pattern_options() {
         if ($this->ignorecase) {
             return 'i';
@@ -201,6 +243,12 @@ class pmatch_options {
         }
     }
 
+    /**
+     * Get the pattern to match any of the characters in the string.
+     *
+     * @param string $charsinstring The characters to match any of.
+     * @return string The pattern to match any of the characters in the string.
+     */
     private function pattern_to_match_any_of($charsinstring) {
         $pattern = '';
         for ($i = 0; $i < core_text::strlen($charsinstring); $i++) {
@@ -236,17 +284,22 @@ class pmatch_parsed_string {
     /** @var array of words created by splitting $string by $options->worddividers */
     public $words;
 
-
+    /**
+     * @var array The misspelled words in the string.
+     */
     private $misspelledwords = null;
 
+    /**
+     * @var string the part of the string that could not be parsed.
+     */
     private $unrecognizedfragment = '';
 
     /**
      * Constructor. Parses string.
      * @param string $string the string to match against.
-     * @param pmatch_options $options the options to use.
+     * @param ?pmatch_options $options the options to use.
      */
-    public function __construct($string, pmatch_options $options = null) {
+    public function __construct($string, ?pmatch_options $options = null) {
         if (!is_null($options)) {
             $this->options = $options;
         } else {
@@ -297,13 +350,20 @@ class pmatch_parsed_string {
     }
 
     /**
-     * @return boolean returns false if any word is misspelled.
+     * Get whether the string is spelled correctly.
+     *
+     * @return bool returns false if any word is misspelled.
      */
     public function is_spelled_correctly() {
         $this->misspelledwords = $this->spell_check();
         return (count($this->misspelledwords) == 0);
     }
 
+    /**
+     * Get whether the string is parseable.
+     *
+     * @return bool Whether the string is parseable.
+     */
     public function is_parseable() {
         if ($this->unrecognizedfragment === '') {
             return true;
@@ -312,10 +372,20 @@ class pmatch_parsed_string {
         }
     }
 
+    /**
+     * Get the unparseable part of the string.
+     *
+     * @return string The unparseable part of the string.
+     */
     public function unparseable() {
         return $this->unrecognizedfragment;
     }
 
+    /**
+     * Spell check the words in the string.
+     *
+     * @return array The misspelled words.
+     */
     protected function spell_check() {
         $misspelledwords = [];
         foreach (array_unique($this->words) as $word) {
@@ -396,6 +466,8 @@ class pmatch_parsed_string {
     }
 
     /**
+     * Get the misspelled words in the string.
+     *
      * @return array all the distinct misspelled words.
      */
     public function get_spelling_errors() {
@@ -403,13 +475,17 @@ class pmatch_parsed_string {
     }
 
     /**
-     * @return integer no of words.
+     * Get the number of words in the string.
+     *
+     * @return int no of words.
      */
     public function get_word_count() {
         return count($this->words);
     }
 
     /**
+     * Get the options that were used to construct this object.
+     *
      * @return pmatch_options the options that were used to construct this object.
      */
     public function get_options() {
@@ -417,6 +493,8 @@ class pmatch_parsed_string {
     }
 
     /**
+     * Get the words that were parsed.
+     *
      * @return array the words to try to match.
      */
     public function get_words() {
@@ -439,13 +517,15 @@ class pmatch_expression {
     /** @var string */
     protected $errormessage;
 
-    /** @var boolean */
+    /** @var bool */
     protected $valid;
 
     /** @var pmatch_options the options to use when matching this expression. */
     protected $options;
 
     /**
+     * The constructor. Parses the expression.
+     *
      * @param string $expression the expression being matched.
      * @param pmatch_options $options the options to use.
      */
@@ -472,6 +552,7 @@ class pmatch_expression {
 
     /**
      * Test a string with a given pmatch expression.
+     *
      * @param pmatch_parsed_string $parsedstring the parsed string to match.
      * @return bool whether this string matches the expression.
      */
@@ -486,7 +567,9 @@ class pmatch_expression {
     }
 
     /**
-     * @return boolean returns false if the string passed to the constructor
+     * Get whether the expression is valid.
+     *
+     * @return bool returns false if the string passed to the constructor
      * could not be parsed as a valid pmatch expression.
      */
     public function is_valid() {
@@ -494,6 +577,8 @@ class pmatch_expression {
     }
 
     /**
+     * Get the parse error message.
+     *
      * @return string description of the syntax error in the expression string
      * if is_valid returned false. Otherwise returns an empty string.
      */
@@ -502,6 +587,8 @@ class pmatch_expression {
     }
 
     /**
+     * Get the options that were used to construct this object.
+     *
      * @return pmatch_options the options that were used to construct this object.
      */
     public function get_options() {
@@ -509,6 +596,8 @@ class pmatch_expression {
     }
 
     /**
+     * Get the original expression string.
+     *
      * @return string the expression, exactly as it was passed to the constructor.
      */
     public function get_original_expression_string() {
@@ -516,6 +605,8 @@ class pmatch_expression {
     }
 
     /**
+     * Get a nicely formatted version of the expression.
+     *
      * @return string a nicely formatted version of the expression.
      */
     public function get_formatted_expression_string() {

@@ -108,7 +108,7 @@ class testquestion_table extends \table_sql {
         return \html_writer::tag('a',
                 $expectedfraction,
                 ['class' => 'updater-ef', 'data-id' => $response->id, 'id' => 'updater-ef_' . $response->id, 'href' => '#',
-                        'title' => get_string('testquestionchangescore', 'qtype_pmatch') ]);
+                        'title' => get_string('testquestionchangescore', 'qtype_pmatch'), ]);
 
     }
 
@@ -139,7 +139,7 @@ class testquestion_table extends \table_sql {
 
     /**
      * Get any extra classes names to add to this row in the HTML.
-     * @param $row array the data for this row.
+     * @param \stdClass $response the data for this row.
      * @return string added to the class="" attribute of the tr.
      */
     public function get_row_class($response) {
@@ -174,7 +174,7 @@ class testquestion_table extends \table_sql {
                    testquestion_response::MATCHED => '(expectedfraction = gradedfraction)',
                    testquestion_response::MISSED_POSITIVE => '(gradedfraction = 0 AND expectedfraction = 1)',
                    testquestion_response::MISSED_NEGATIVE => '(gradedfraction = 1 AND expectedfraction = 0)',
-                   testquestion_response::UNGRADED => '(expectedfraction IS NULL)'
+                   testquestion_response::UNGRADED => '(expectedfraction IS NULL)',
             ];
             $statesql = ' AND (';
             $count = 0;
@@ -198,6 +198,11 @@ class testquestion_table extends \table_sql {
     /**
      * Prints the responses table form. Overrides parent functionality.
      * Parameters passed here are not used, but must refect parent function declaration.
+     *
+     * @param int $pagesize the number of rows per page.
+     * @param bool $useinitialsbar whether to use the initials bar.
+     * @param string $downloadhelpbutton the download help button.
+     * @return void
      */
     public function out($pagesize, $useinitialsbar, $downloadhelpbutton = '') {
         $this->set_up_table_form();
@@ -243,6 +248,11 @@ class testquestion_table extends \table_sql {
         return $sortcolumns;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @return void
+     */
     public function wrap_html_start() {
         if ($this->is_downloading() || !$this->includecheckboxes) {
             return;
@@ -255,6 +265,11 @@ class testquestion_table extends \table_sql {
         echo \html_writer::input_hidden_params($url);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @return void
+     */
     public function wrap_html_finish() {
         global $PAGE;
         if ($this->is_downloading() || !$this->includecheckboxes) {
@@ -320,8 +335,8 @@ class testquestion_table extends \table_sql {
     /**
      * Return row as html for response table.
      *
-     * @param $row \stdClass the response to display.
-     * @param $curentrow int the index of current editing row.
+     * @param \stdClass $row the response to display.
+     * @param int $curentrow the index of current editing row.
      * @return string row html to append response table.
      */
     public function get_row_html_for_response_table($row, $curentrow) {

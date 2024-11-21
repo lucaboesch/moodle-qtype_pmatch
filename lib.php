@@ -127,7 +127,7 @@ function qtype_pmatch_inplace_editable($itemtype, $itemid, $newvalue): \core\out
             $result = qtype_pmatch_external::update_computed_mark_and_get_row_response($response->id, $question, null);
             // An json string pass value to updater.js file.
             $responsevalue = json_encode(['html' => $result['html'],
-                    'summary' => get_string('testquestionresultssummary', 'qtype_pmatch', $result['counts'])]);
+                    'summary' => get_string('testquestionresultssummary', 'qtype_pmatch', $result['counts']), ]);
         } else {
             $responsevalue = $response->response;
         }
