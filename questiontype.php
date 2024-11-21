@@ -41,6 +41,14 @@ require_once($CFG->dirroot . '/question/type/pmatch/question.php');
  */
 class qtype_pmatch extends question_type {
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param stdClass $question the question.
+     * @return array|action_menu_link[] any actions you want to add to the Edit menu for this question.
+     * @throws \core\exception\moodle_exception
+     * @throws coding_exception
+     */
     public function get_extra_question_bank_actions(stdClass $question): array {
         $actions = parent::get_extra_question_bank_actions($question);
 
@@ -54,6 +62,13 @@ class qtype_pmatch extends question_type {
         return $actions;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param stdClass $question the question.
+     * @return bool Indicates success or failure.
+     * @throws dml_exception
+     */
     public function get_question_options($question): bool {
         global $DB;
         parent::get_question_options($question);
@@ -63,24 +78,50 @@ class qtype_pmatch extends question_type {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @return string[] the extra question fields.
+     */
     public function extra_question_fields(): array {
         return ['qtype_pmatch', 'usecase', 'allowsubscript', 'allowsuperscript',
             'forcelength', 'applydictionarycheck', 'extenddictionary', 'sentencedividers', 'converttospace',
-            'modelanswer', 'responsetemplate'];
+            'modelanswer', 'responsetemplate', ];
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param int $questionid the question id
+     * @param int $oldcontextid the old context id
+     * @param int $newcontextid the new context id
+     * @return void
+     */
     public function move_files($questionid, $oldcontextid, $newcontextid) {
         parent::move_files($questionid, $oldcontextid, $newcontextid);
         $this->move_files_in_answers($questionid, $oldcontextid, $newcontextid);
         $this->move_files_in_hints($questionid, $oldcontextid, $newcontextid);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param int $questionid the question id
+     * @param int $contextid the context id
+     * @return void
+     */
     protected function delete_files($questionid, $contextid) {
         parent::delete_files($questionid, $contextid);
         $this->delete_files_in_answers($questionid, $contextid);
         $this->delete_files_in_hints($questionid, $contextid);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param stdClass $fromform
+     * @return void
+     */
     public function save_defaults_for_new_questions(stdClass $fromform): void {
         parent::save_defaults_for_new_questions($fromform);
         $this->set_default_value('usecase', $fromform->usecase);
@@ -94,6 +135,15 @@ class qtype_pmatch extends question_type {
         $this->set_default_value('converttospace', $fromform->converttospace);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param stdClass $question the question.
+     * @param stdClass $fromform data from the form.
+     * @return stdClass The question.
+     * @throws coding_exception
+     * @throws moodle_exception
+     */
     public function save_question($question, $fromform): stdClass {
         global $CFG;
 
@@ -107,6 +157,13 @@ class qtype_pmatch extends question_type {
         return parent::save_question($question, $fromform);
     }
 
+    /**
+     * Save the question options.
+     *
+     * @param stdClass $fromform data from the form.
+     * @return bool|stdClass|null true if all is OK, false if there was an error, stdClass if there were answers saved.
+     * @throws dml_exception
+     */
     public function save_question_options($fromform) {
         global $DB;
 
@@ -183,6 +240,12 @@ class qtype_pmatch extends question_type {
         return $savedanswersresult;
     }
 
+    /**
+     * Save the rule matches.
+     *
+     * @param stdClass $question the question.
+     * @return void
+     */
     protected function save_rule_matches($question) {
         // Purge this question from the cache.
         question_bank::notify_question_edited($question->id);
@@ -192,6 +255,14 @@ class qtype_pmatch extends question_type {
         testquestion_responses::grade_responses_and_save_matches($questionobj);
     }
 
+    /**
+     * Save the answers.
+     *
+     * @param stdClass $question the question.
+     * @return stdClass|null The answers or null if there was an error.
+     * @throws coding_exception
+     * @throws dml_exception
+     */
     protected function save_answers($question): ?stdClass {
         global $DB;
         $oldanswers = $DB->get_records('question_answers',
@@ -272,10 +343,27 @@ class qtype_pmatch extends question_type {
         }
     }
 
+    /**
+     * Save extra answer data.
+     *
+     * @param stdClass $question the question.
+     * @param string $key The key.
+     * @param int $answerid The answer id.
+     * @return void
+     */
     public function save_extra_answer_data($question, $key, $answerid) {
     }
 
-    public function import_from_xml($data, $question, qformat_xml $format, $extra=null) {
+    /**
+     * {@inheritDoc}
+     *
+     * @param stdClass $data The data to be imported.
+     * @param stdClass $question the question.
+     * @param qformat_xml $format the importer/exporter object.
+     * @param stdClass $extra extra data.
+     * @return false|object the question object or false if there was an error.
+     */
+    public function import_from_xml($data, $question, qformat_xml $format, $extra = null) {
         $question = parent::import_from_xml($data, $question, $format, $extra);
         if (!$question) {
             return false;
@@ -301,13 +389,13 @@ class qtype_pmatch extends question_type {
     }
 
     /**
-     * Helper method used by {@link import_from_xml()}. Handle the data for test question responses text.
+     * Helper method used by {@see import_from_xml()}. Handle the data for test question responses text.
      *
      * @param qformat_xml $format the importer/exporter object.
      * @param stdClass $question the question.
      * @param array $testquestionresponses the bit of the XML representing test question responses data.
      */
-    public function import_responses(qformat_xml $format, stdClass$question, array $testquestionresponses): void {
+    public function import_responses(qformat_xml $format, stdClass $question, array $testquestionresponses): void {
         $responses = [];
         foreach ($testquestionresponses as $testquestionresponse) {
             $response = $this->get_response_data($format, $testquestionresponse);
@@ -333,12 +421,28 @@ class qtype_pmatch extends question_type {
         return $response;
     }
 
+    /**
+     * Import synonyms.
+     *
+     * @param qformat_xml $format the importer/exporter object.
+     * @param stdClass $question the question.
+     * @param array $synonyms The array representing the synonyms.
+     * @return void
+     */
     public function import_synonyms(qformat_xml $format, stdClass $question, array $synonyms): void {
         foreach ($synonyms as $synonym) {
             $this->import_synonym($format, $question, $synonym);
         }
     }
 
+    /**
+     * Import a synonym.
+     *
+     * @param qformat_xml $format the importer/exporter object.
+     * @param stdClass $question the question.
+     * @param array $synonym The array representing the synonym.
+     * @return void
+     */
     public function import_synonym(qformat_xml $format, stdClass $question, array $synonym): void {
         static $indexno = 0;
         $question->synonymsdata[$indexno]['word'] =
@@ -348,6 +452,14 @@ class qtype_pmatch extends question_type {
         $indexno++;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param stdClass $question the question.
+     * @param qformat_xml $format the importer/exporter object.
+     * @param array $extra extra data.
+     * @return string
+     */
     public function export_to_xml($question, qformat_xml $format, $extra = null): string {
         $output = parent::export_to_xml($question, $format, $extra);
 
@@ -358,7 +470,7 @@ class qtype_pmatch extends question_type {
     }
 
     /**
-     * Helper method used by {@link export_to_xml()}.
+     * Helper method used by {@see export_to_xml()}.
      *
      * @param stdClass $question the question.
      * @param qformat_xml $format the importer/exporter object.
@@ -399,6 +511,13 @@ class qtype_pmatch extends question_type {
         return $output;
     }
 
+    /**
+     * Write XML fragment for multiple synonyms.
+     *
+     * @param array $synonyms The synonyms.
+     * @param qformat_xml $format The format class exporting the question
+     * @return string
+     */
     protected function write_synonyms(array $synonyms, qformat_xml $format): string {
         if (empty($synonyms)) {
             return '';
@@ -410,6 +529,13 @@ class qtype_pmatch extends question_type {
         return $output;
     }
 
+    /**
+     * Write XML fragment for one synonym.
+     *
+     * @param stdClass $synonym The synonym.
+     * @param qformat_xml $format The format class exporting the question
+     * @return string
+     */
     protected function write_synonym(stdClass $synonym, qformat_xml $format): string {
         $output = '';
         $output .= "    <synonym>\n";
@@ -423,6 +549,13 @@ class qtype_pmatch extends question_type {
         return $output;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param question_definition $question the question_definition we are creating.
+     * @param object $questiondata the question data loaded from the database.
+     * @return void
+     */
     protected function initialise_question_instance(question_definition $question, $questiondata) {
         parent::initialise_question_instance($question, $questiondata);
 
@@ -444,10 +577,26 @@ class qtype_pmatch extends question_type {
         $this->initialise_question_answers($question, $questiondata);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param stdClass $questiondata data defining a question, as returned by
+     *      question_bank::load_question_data().
+     * @return number|null either a fraction estimating what the student would
+     *      score by guessing, or null, if it is not possible to estimate.
+     */
     public function get_random_guess_score($questiondata): float {
         return 0;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param object $questiondata the question definition data.
+     * @return array keys are subquestionid, values are arrays of possible
+     *      responses to that subquestion.
+     * @throws coding_exception
+     */
     public function get_possible_responses($questiondata): array {
         $responses = [];
 
@@ -468,6 +617,15 @@ class qtype_pmatch extends question_type {
         return [$questiondata->id => $responses];
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @param int $questionid the id of the question being deleted.
+     * @param int $contextid the context this quesiotn belongs to.
+     * @return void
+     * @throws coding_exception
+     * @throws dml_exception
+     */
     public function delete_question($questionid, $contextid): void {
         global $DB;
         $DB->delete_records('qtype_pmatch_synonyms', ['questionid' => $questionid]);

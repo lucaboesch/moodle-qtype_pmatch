@@ -48,14 +48,28 @@ require_once($CFG->dirroot . '/question/type/pmatch/pmatchlib.php');
  */
 class amati_rule_suggestion {
 
+    /**
+     * AMATI rules are prefixed with correct_response(A) :-
+     */
     const AMATI_RULE_PREFIX = 'correct_response(A) :-';
+    /**
+     * Amati rules are empty when there are no suggestions.
+     */
     const AMATI_EMPTY_RULE = 'correct_response(A).';
     /**
      * Operators in AMATI rules add or exclude a phrase from a match or provide an alternate and
      * include add, esclude and or
      */
     const RULE_OPERATOR_AND = 'AND';
+    /**
+     * Operators in AMATI rules add or exclude a phrase from a match or provide an alternate and
+     * include add, esclude and or
+     */
     const RULE_OPERATOR_NOT = 'NOT';
+    /**
+     * Operators in AMATI rules add or exclude a phrase from a match or provide an alternate and
+     * include add, esclude and or
+     */
     const RULE_OPERATOR_OR = 'OR';
 
     /**
@@ -223,7 +237,7 @@ class amati_rule_suggestion {
      * Here we wrap each sub rule in the operator correct operator using match_all for
      * ADD  and match_any for OR.
      *
-     * @param \stdClass[] $subrules Sub rules converted to consyituent parameteres
+     * @param \stdClass[] $subrulesasparameters Sub rules converted to consyituent parameteres
      * @return string valid pmatch rule
      */
     public static function get_pmatch_rule_from_subrules($subrulesasparameters) {
@@ -317,21 +331,21 @@ class amati_rule_suggestion {
      * @param string $rule amati rule to translate to pmatch
      * @return string translated pmatch rule
      */
-    public static function get_pmatch_rule_from_amati_rule ($rule) {
+    public static function get_pmatch_rule_from_amati_rule($rule) {
         // Translate each rule into an array of parameter objects that describe
         // the AMATI rule.
         $subrulesasparameters = self::get_parameters_from_amati_rule($rule);
 
         // Convert the parameter objects into equivalent pmatch rules.
-        return self::get_pmatch_rule_from_subrules ($subrulesasparameters);
+        return self::get_pmatch_rule_from_subrules($subrulesasparameters);
     }
 
     /**
      * Translate an array of AMATI rules into an equivalent pmatch rules.
-     * @param string[] $rule amati rules to translate to pmatch
+     * @param string[] $amatirules amati rules to translate to pmatch
      * @return string[] translated pmatch rules
      */
-    public static function get_pmatch_rules_from_amati_rules ($amatirules) {
+    public static function get_pmatch_rules_from_amati_rules($amatirules) {
         $rules = [];
         foreach ($amatirules as $rule) {
             $pmatchrule = self::get_pmatch_rule_from_amati_rule($rule->rule);
@@ -452,8 +466,8 @@ class amati_rule_suggestion {
      *
      * This must be done in qtype_pmatch_edit_form:: add_per_answer_fields before the edit question
      * form answer fields are created.
-     * @param object $question
-     * @param string[]
+     * @param object $question The question object from a moodle form.
+     * @param string[] $suggestedrules rules returned from the amati suggestion service.
      * @return void
      */
     public static function add_suggested_rules_to_question($question, $suggestedrules) {

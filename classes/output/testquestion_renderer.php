@@ -61,7 +61,7 @@ class qtype_pmatch_testquestion_renderer extends plugin_renderer_base {
                 'id' => 'uploadbutton',
                 'value' => get_string('testquestionuploadresponses', 'qtype_pmatch'),
                 "onclick" => "window.location.href = '" . $link->out(false) . "'",
-                'class' => 'btn btn-secondary']
+                'class' => 'btn btn-secondary', ]
             );
     }
 
@@ -102,7 +102,7 @@ class qtype_pmatch_testquestion_renderer extends plugin_renderer_base {
             $html .= html_writer::start_tag('p', ['id' => 'wrapperactionresponse']);
             $html .= html_writer::tag('input', '', ['type' => 'button',
                     'value' => get_string('testquestionformnewresponsebutton', 'qtype_pmatch'),
-                    'id' => 'newresponsebutton', 'class' => 'btn btn-secondary m-t-0']);
+                    'id' => 'newresponsebutton', 'class' => 'btn btn-secondary m-t-0', ]);
             $html .= ' ' . $this->get_uploadresponses_link($question);
             $html .= \html_writer::end_tag('p');
 
@@ -149,7 +149,7 @@ class qtype_pmatch_testquestion_renderer extends plugin_renderer_base {
             $this->page->requires->strings_for_js(['ok', 'selectall', 'deselectall'], 'moodle');
             $this->page->requires->strings_for_js(['error:title', 'testquestionresultssummary',
                     'testquestionformsaveresponsebutton',
-                    'testquestionformcancelresponsebutton'], 'qtype_pmatch');
+                    'testquestionformcancelresponsebutton', ], 'qtype_pmatch');
         }
 
         return $html;

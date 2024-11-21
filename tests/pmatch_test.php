@@ -36,20 +36,41 @@ require_once($CFG->dirroot . '/question/type/pmatch/pmatchlib.php');
  * @covers \pmatch_options
  * @covers \pmatch_parsed_string
  */
-class pmatch_test extends \basic_testcase {
+final class pmatch_test extends \basic_testcase {
 
-    protected function match(string $string, string $expression, pmatch_options $options = null): bool {
+    /**
+     * Match a string against a regular expression.
+     *
+     * @param string $string The string to match.
+     * @param string $expression The regular expression to match against.
+     * @param ?pmatch_options $options The options to use for matching.
+     * @return bool Whether the string matches the expression.
+     * @throws \coding_exception
+     */
+    protected function match(string $string, string $expression, ?pmatch_options $options = null): bool {
         $string = new pmatch_parsed_string($string, $options);
         $expression = new pmatch_expression($expression, $options);
         $this->assertEquals('', $expression->get_parse_error());
         return $expression->matches($string);
     }
 
-    protected function error_message(string $expression, pmatch_options $options = null): string {
+    /**
+     * Get the error message for a regular expression.
+     *
+     * @param string $expression The regular expression to match against.
+     * @param ?pmatch_options $options The options to use for matching.
+     * @return string The error message.
+     */
+    protected function error_message(string $expression, ?pmatch_options $options = null): string {
         $expression = new pmatch_expression($expression, $options);
         return $expression->get_parse_error();
     }
 
+    /**
+     * Test the strip sentence divider.
+     *
+     * @return void
+     */
     public function test_strip_sentence_divider(): void {
         $options = new pmatch_options();
 
@@ -64,31 +85,31 @@ class pmatch_test extends \basic_testcase {
     /**
      * Data provider function for test_pmatch_error
      *
-     * @return array
+     * @return array The data.
      */
-    public function pmatch_error_provider(): array {
+    public static function pmatch_error_provider(): array {
         return [
                 // No closing bracket.
                 ['match_mow([tom maud]|[sid jane]', get_string('ie_missingclosingbracket',
-                        'qtype_pmatch', 'match_mow([tom maud]|[sid jane]')],
+                        'qtype_pmatch', 'match_mow([tom maud]|[sid jane]'), ],
                 // No contents.
                 ['match_mow()', get_string('ie_unrecognisedsubcontents',
-                        'qtype_pmatch', 'match_mow()')],
+                        'qtype_pmatch', 'match_mow()'), ],
                 // Short contents and wrong format.
                 ['match_any([tom])', get_string('ie_unrecognisedsubcontents',
-                    'qtype_pmatch', 'match_any([tom])')],
+                    'qtype_pmatch', 'match_any([tom])'), ],
                 // Long contents and wrong format.
                 ['match_any([tom maud])', get_string('ie_unrecognisedsubcontents',
-                    'qtype_pmatch', 'match_any([tom ma...')],
+                    'qtype_pmatch', 'match_any([tom ma...'), ],
                 // Ends in an or character.
                 ['match_mow([tom maud]|)', get_string('ie_lastsubcontenttypeorcharacter',
-                        'qtype_pmatch', '[tom maud]|')],
+                        'qtype_pmatch', '[tom maud]|'), ],
                 // Ends in a space.
                 ['match_mow([tom maud] )', get_string('ie_lastsubcontenttypeworddelimiter',
-                        'qtype_pmatch', 'match_mow([tom maud] )')],
+                        'qtype_pmatch', 'match_mow([tom maud] )'), ],
                 // Ends in a proximity delimiter.
                 ['match_mow([tom maud]_)', get_string('ie_lastsubcontenttypeworddelimiter',
-                        'qtype_pmatch', 'match_mow([tom maud]_)')],
+                        'qtype_pmatch', 'match_mow([tom maud]_)'), ],
                 // A full stop is only allowed in match expressions if surrounded on both sides by digits.
                 ['match(abc.)', ''],
                 ['match(abc.def)', ''],
@@ -112,10 +133,11 @@ class pmatch_test extends \basic_testcase {
      * Test for messege error
      *
      * @dataProvider pmatch_error_provider
-     * @param $expression
-     * @param $actual
+     * @param string $expression The regular expression to match against.
+     * @param string $actual The actual error message.
+     * @return void
      */
-    public function test_pmatch_error($expression, $actual) {
+    public function test_pmatch_error($expression, $actual): void {
         $this->assertEquals($this->error_message($expression), $actual);
     }
 
@@ -124,7 +146,7 @@ class pmatch_test extends \basic_testcase {
      *
      * @return array
      */
-    public function pmatch_matching_provider(): array {
+    public static function pmatch_matching_provider(): array {
         $options = new pmatch_options();
         $options->sentencedividers = '|$';
 
@@ -340,7 +362,7 @@ EOF;
                 ['', 'match(*)', true],
                 ['ABCD', 'match(abcd)', true, pmatch_options::make(['ignorecase' => true])],
                 ['Mary had a little LamB', 'match(mary had a little lamb)', true,
-                        pmatch_options::make(['ignorecase' => true])],
+                        pmatch_options::make(['ignorecase' => true]), ],
                 ['ABCD', 'match(abcd)', false, pmatch_options::make(['ignorecase' => false])],
                 ['efgh', 'not ( match_c(c) )', true],
                 ['abc', 'not ( match_c(c) )', false],
@@ -401,9 +423,9 @@ EOF;
                 // The sentence divider can be any characters (although they should not be characters that
                 // might appear in a word).
                 ['one four| two|', 'match_w(one_two)', false,
-                        pmatch_options::make(['sentencedividers' => '|'])],
+                        pmatch_options::make(['sentencedividers' => '|']), ],
                 ['one four two|', 'match_w(one_two)', true,
-                        pmatch_options::make(['sentencedividers' => '|'])],
+                        pmatch_options::make(['sentencedividers' => '|']), ],
                 ['one four| two|', 'match_w(one_two)', false, $options],
                 ['one four two|', 'match_w(one_two)', true, $options],
                 ['one four$ two$', 'match_w(one_two)', false, $options],
@@ -417,13 +439,13 @@ EOF;
                 ['abceghmn', $expressionstr, false],
                 ['fghij', 'match(abcde)', false],
                 ['fghij', 'match(abcde)', true,
-                        pmatch_options::make(['synonyms' => ['abcde' => 'xyz|fghij']])],
+                        pmatch_options::make(['synonyms' => ['abcde' => 'xyz|fghij']]), ],
                 // Further tests to check that phrase is matching the right no of words.
                 ['it does not really contain an object which is a verb',
-                        'match_mw([not contain]_verb)', false],
+                        'match_mw([not contain]_verb)', false, ],
                 ['it is not really a sentence it would be classed as a' .
                         ' phrase as it does not contain an object which would indicate who thought of the ' .
-                        'good idea or a verb', 'match_m([not contain]|abc_verb)', false],
+                        'good idea or a verb', 'match_m([not contain]|abc_verb)', false, ],
                 ['not contain is a verb', 'match_mw([not contain]|abc_verb)', true],
                 ['not contain is not a verb', 'match_mw([not contain]|abc_verb)', false],
                 // Test full stop as word separator.
@@ -440,16 +462,16 @@ EOF;
                 ['one.five.', 'match_wp3(one_five)', false],
                 // Problem from Redmine issue #8018.
                 ['first phrase second sequence',
-                        'match_mow ([first phrase]|firstphrase [second sequence]|secondsequence)', true],
+                        'match_mow ([first phrase]|firstphrase [second sequence]|secondsequence)', true, ],
                 ['second sequence first phrase',
-                        'match_mow ([first phrase]|firstphrase [second sequence]|secondsequence)', true],
+                        'match_mow ([first phrase]|firstphrase [second sequence]|secondsequence)', true, ],
                 ['firstphrase secondsequence',
-                        'match_mow ([first phrase]|firstphrase [second sequence]|secondsequence)', true],
+                        'match_mow ([first phrase]|firstphrase [second sequence]|secondsequence)', true, ],
                 ['secondsequence firstphrase',
-                        'match_mow ([first phrase]|firstphrase [second sequence]|secondsequence)', true],
+                        'match_mow ([first phrase]|firstphrase [second sequence]|secondsequence)', true, ],
                 // Problem from Redmine issue #8948.
                 ['Pb<sup>2+</sup>(aq) + 2Cl<sup>-</sup>(aq) = PbCl<sub>2</sub>(s)',
-                        'match(Pb<sup>2+</sup>\(aq\) + 2Cl<sup>-</sup>\(aq\) = PbCl<sub>2</sub>\(s\))', true],
+                        'match(Pb<sup>2+</sup>\(aq\) + 2Cl<sup>-</sup>\(aq\) = PbCl<sub>2</sub>\(s\))', true, ],
                 // Character punctuation.
                 ['¡¿Y tú quién te crees', 'match(¡¿Y tú quién te crees)', true],
                 ['«Das Mädchen ist sehr schön»', 'match(«Das Mädchen ist sehr schön»)', true],
@@ -465,17 +487,17 @@ EOF;
                 ['Test.', 'match(Test?)', true, pmatch_options::make(['sentencedividers' => ''])],
                 ['Testa', 'match(Test?)', true, pmatch_options::make(['sentencedividers' => ''])],
                 ['Punctuation is important.', 'match(Punctuation is important.)', true,
-                        pmatch_options::make(['sentencedividers' => ''])],
+                        pmatch_options::make(['sentencedividers' => '']), ],
                 ['Punctuation is important', 'match(Punctuation is important.)', false,
-                        pmatch_options::make(['sentencedividers' => ''])],
+                        pmatch_options::make(['sentencedividers' => '']), ],
                 ['Is punctuation important?', 'match(Is punctuation important?)', true,
-                        pmatch_options::make(['sentencedividers' => ''])],
+                        pmatch_options::make(['sentencedividers' => '']), ],
                 ['Is punctuation important?', 'match(Is punctuation important)', false,
-                        pmatch_options::make(['sentencedividers' => ''])],
+                        pmatch_options::make(['sentencedividers' => '']), ],
                 ['Punctuation is important!', 'match(Punctuation is important!)', true,
-                        pmatch_options::make(['sentencedividers' => ''])],
+                        pmatch_options::make(['sentencedividers' => '']), ],
                 ['Punctuation is important!', 'match(Punctuation is important)', false,
-                        pmatch_options::make(['sentencedividers' => ''])],
+                        pmatch_options::make(['sentencedividers' => '']), ],
         ];
     }
 
@@ -484,13 +506,13 @@ EOF;
      *
      * @dataProvider pmatch_matching_provider
      *
-     * @param string $string
-     * @param string $expression
-     * @param bool|null $shouldmatch is method assert.
-     * @param pmatch_options|null $options is options for method assert.
+     * @param string $string The string to match.
+     * @param string $expression The regular expression to match against.
+     * @param ?bool $shouldmatch is method assert.
+     * @param ?pmatch_options $options is options for method assert.
      */
     public function test_pmatch_matching(string $string, string $expression,
-            ?bool $shouldmatch, pmatch_options $options = null): void {
+            ?bool $shouldmatch, ?pmatch_options $options = null): void {
         if ($shouldmatch) {
             $this->assertTrue($this->match($string, $expression, $options));
         } else {
@@ -503,7 +525,7 @@ EOF;
      *
      * @return array
      */
-    public function pmatch_formatting_provider(): array {
+    public static function pmatch_formatting_provider(): array {
         return [
                 ['match_all (
     match_any (
@@ -519,7 +541,7 @@ EOF;
 )
 ', 'match_all(match_any(not(match_cow(one_two))' .
                         'match_mfw(three|[four five]))' .
-                        'match_any(match_mrw(six|nine nine)match_m2w(seven|[eight ten])))'],
+                        'match_any(match_mrw(six|nine nine)match_m2w(seven|[eight ten])))', ],
                 ["match_m (three|[four five])\n", 'match_mfmtxr(three|[four five])'],
                 ["match_mow (three|[four five])\n", 'match_mfmtxrow(three|[four five])'],
                 ["match_m2 (three|[four five])\n", 'match_mfmtxr2(three|[four five])'],
@@ -568,7 +590,7 @@ EOF;
                             'match_all(match_all(match_any(match_c(c)match_c(d))' .
                             'match_any(match_c(e)match_c(f))match_all(match_c(g)match_c(h)))' .
                             'not(match_any(match_any(match_c(i)match_c(j))' .
-                            'match_any(match_c(k)match_c(l))match_all(match_c(m)match_c(n))))))'],
+                            'match_any(match_c(k)match_c(l))match_all(match_c(m)match_c(n))))))', ],
                         ];
     }
 
@@ -577,15 +599,20 @@ EOF;
      *
      * @dataProvider pmatch_formatting_provider
      *
-     * @param string $expected
-     * @param string $unformattedexpression
+     * @param string $expected The expected formatted expression string.
+     * @param string $unformattedexpression The unformatted expression string.
      */
     public function test_pmatch_formatting(string $expected, string $unformattedexpression): void {
         $expression = new pmatch_expression($unformattedexpression);
         $this->assertEquals($expected, $expression->get_formatted_expression_string());
     }
 
-    public function pmatch_number_regex_testcases(): array {
+    /**
+     * Data provider function for test_pmatch_number_regex
+     *
+     * @return array[] The test cases.
+     */
+    public static function pmatch_number_regex_testcases(): array {
         return [
             ['1.981', 1],
             ['-1.981', 1],
@@ -608,16 +635,23 @@ EOF;
     }
 
     /**
+     * Test for pmatch number regex
+     *
      * @dataProvider pmatch_number_regex_testcases
      *
-     * @param string $string
-     * @param array $expectedmatches
+     * @param string $string The string to match.
+     * @param int $expectedmatches The expected matches.
      */
     public function test_pmatch_number_regex(string $string, int $expectedmatches): void {
         $this->assertSame($expectedmatches, preg_match('!'.PMATCH_NUMBER.'$!A', $string));
     }
 
-    public function pmatch_number_matching_cases(): array {
+    /**
+     * Returns the matching cases for a pmatch expression.
+     *
+     * @return array[]
+     */
+    public static function pmatch_number_matching_cases(): array {
         return [
             ['2', 'match(2)', true],
             ['1', 'match(1)', true],
@@ -676,9 +710,16 @@ EOF;
     }
 
     /**
+     * Test for pmatch number matching
+     *
      * @dataProvider pmatch_number_matching_cases
+     *
+     * @param string $string The string to match.
+     * @param string $expression The regular expression to match against.
+     * @param bool $shouldmatch Whether the string should match the expression.
+     * @return void
      */
-    public function test_pmatch_number_matching($string, $expression, $shouldmatch) {
+    public function test_pmatch_number_matching($string, $expression, $shouldmatch): void {
         if ($shouldmatch) {
             $this->assertTrue($this->match($string, $expression));
         } else {
@@ -686,7 +727,13 @@ EOF;
         }
     }
 
-    public function test_pmatch_unicode_matching() {
+    /**
+     * Test for pmatch unicode matching
+     *
+     * @return void
+     * @throws \coding_exception
+     */
+    public function test_pmatch_unicode_matching(): void {
         // Unicode normalisation means that the same characters with two different
         // unicode representations should match.
         // "\xC3\x85" = 'LATIN CAPITAL LETTER A WITH RING ABOVE' (U+00C5)
@@ -694,7 +741,13 @@ EOF;
         $this->assertTrue($this->match("A\xCC\x8A", "match(\xC3\x85)"));
     }
 
-    public function test_pmatch_matching_countries() {
+    /**
+     * Test for pmatch matching countries
+     *
+     * @return void
+     * @throws \coding_exception
+     */
+    public function test_pmatch_matching_countries(): void {
         // This is a minimal failure in that doing any one of these things fixes it:
         // - Removing the set_synonyms call.
         // - Removing A from both the string and the pattern.

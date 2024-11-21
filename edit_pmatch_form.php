@@ -46,6 +46,15 @@ class qtype_pmatch_edit_form extends question_edit_form {
      */
     protected $suggestedrules = null;
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param string $submiturl The URL to submit the form to.
+     * @param object $question The data being passed to the form.
+     * @param int $category The question category.
+     * @param array $contexts The contexts.
+     * @param bool $formeditable Whether the form is editable.
+     */
     public function __construct($submiturl, $question, $category, $contexts, $formeditable = true) {
         // Separate the Any other' answer from the list of normal answers.
         if (!empty($question->options->answers)) {
@@ -60,6 +69,13 @@ class qtype_pmatch_edit_form extends question_edit_form {
         parent::__construct($submiturl, $question, $category, $contexts, $formeditable = true);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param object $mform the form being built.
+     * @return void
+     * @throws coding_exception
+     */
     protected function definition_inner($mform) {
         $this->general_answer_fields($mform);
         $standardplaceholders = $this->get_possible_answer_placeholders(6);
@@ -69,7 +85,7 @@ class qtype_pmatch_edit_form extends question_edit_form {
                     'value' => $placeholder, 'onfocus' => 'this.select()',
                     'class' => 'form-control-plaintext d-inline-block w-auto mr-3',
                     'name' => 'placeholder',
-                    'id' => 'possibleanswerplaceholder-' . $key]);
+                    'id' => 'possibleanswerplaceholder-' . $key, ]);
             }, array_keys($standardplaceholders), $standardplaceholders);
         $possibleanswerplaceholders = $mform->createElement('static', 'possibleanswerplaceholder',
             get_string('modelanswer_possibleanswerplaceholders', 'qtype_pmatch'), implode("\n", $placeholders));
@@ -103,6 +119,18 @@ class qtype_pmatch_edit_form extends question_edit_form {
         return $output;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param object $mform the form being built.
+     * @param string $label the label to use for each option.
+     * @param array $gradeoptions the possible grades for each answer.
+     * @param int $minoptions the minimum number of answer blanks to display.
+     *       Default QUESTION_NUMANS_START.
+     * @param int $addoptions the number of answer blanks to add. Default QUESTION_NUMANS_ADD.
+     * @return void
+     * @throws coding_exception
+     */
     protected function add_per_answer_fields(&$mform, $label, $gradeoptions,
             $minoptions = QUESTION_NUMANS_START, $addoptions = QUESTION_NUMANS_ADD) {
 
@@ -239,6 +267,12 @@ class qtype_pmatch_edit_form extends question_edit_form {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @return string The language string to use for 'Add {no} more {whatever we call answers}'
+     * @throws coding_exception
+     */
     protected function get_more_choices_string() {
         return get_string('addmoreanswerblanks', 'qtype_pmatch');
     }
@@ -343,6 +377,17 @@ class qtype_pmatch_edit_form extends question_edit_form {
         $mform->setType('responsetemplate', PARAM_RAW_TRIMMED);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param object $mform the form being built.
+     * @param string $label the label to use for each option.
+     * @param array $gradeoptions the possible grades for each answer.
+     * @param array $repeatedoptions the array of repeated options to fill.
+     * @param array $answersoption the answers option.
+     * @return array of form fields.
+     * @throws coding_exception
+     */
     protected function get_per_answer_fields($mform, $label, $gradeoptions,
                                                             &$repeatedoptions, &$answersoption) {
         $repeated = [];
@@ -371,6 +416,12 @@ class qtype_pmatch_edit_form extends question_edit_form {
         return $repeated;
     }
 
+    /**
+     * Gets the try rule button.
+     *
+     * @return string The try rule button.
+     * @throws coding_exception
+     */
     protected function get_try_button() {
         $html = '';
         if (!\qtype_pmatch\testquestion_responses::has_responses($this->question)) {
@@ -386,7 +437,7 @@ class qtype_pmatch_edit_form extends question_edit_form {
     /**
      * Gets the rule creation assistant link.
      *
-     * @return string
+     * @return string The rule creation assistant link.
      */
     protected function get_rc_title() {
         global $OUTPUT;
@@ -398,7 +449,7 @@ class qtype_pmatch_edit_form extends question_edit_form {
      * Gets the rule creation assistant content.
      * This could be added as a template at a later stage.
      *
-     * @return string
+     * @return string The rule creation assistant content.
      */
     protected function get_rc_content() {
         $html = html_writer::start_div('rule-creator rc-hidden');
@@ -461,9 +512,12 @@ EOT;
         return $html;
     }
 
-    /*
+    /**
      * Adds the rule suggestion fields to the form
+     *
      * @param MoodleQuickForm $mform the form being built.
+     * @return void
+     * @throws coding_exception
      */
     protected function add_rule_suggestion_fields($mform) {
         $feedback = '';
@@ -511,6 +565,12 @@ EOT;
         }
     }
 
+    /**
+     * Perform an preprocessing needed on the data passed to the form.
+     *
+     * @param object $question The data being passed to the form.
+     * @return mixed
+     */
     protected function data_preprocessing_other_answer($question) {
         // Special handling of otheranswer.
         if ($this->otheranswer) {
@@ -533,6 +593,13 @@ EOT;
         return $question;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param object $question The data being passed to the form.
+     * @return stdClass The modified data.
+     * @throws \core\exception\coding_exception
+     */
     protected function data_preprocessing($question) {
         $question = parent::data_preprocessing($question);
         $question = $this->data_preprocessing_other_answer($question); // Must come first.
@@ -544,6 +611,15 @@ EOT;
         return $question;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param array $data array of ("fieldname"=>value) of submitted data
+     * @param array $files array of uploaded files "element_name"=>tmp_file_path
+     * @return array of "element_name"=>"error_description" if there are errors,
+     *           or an empty array if everything is OK (true allowed for backwards compatibility too).
+     * @throws coding_exception
+     */
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
 
@@ -595,6 +671,14 @@ EOT;
         return $errors;
     }
 
+    /**
+     * Get errors for the placeholder.
+     *
+     * @param string $questiontext The question text.
+     * @param bool $usesubsup Whether to use subscript and superscript.
+     * @return array The errors.
+     * @throws coding_exception
+     */
     protected function place_holder_errors($questiontext, $usesubsup) {
         // Check sizes of answer box within a reasonable range.
         $errors = [];
@@ -617,6 +701,11 @@ EOT;
         return $errors;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @return string The question type name
+     */
     public function qtype() {
         return 'pmatch';
     }

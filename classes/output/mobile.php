@@ -25,6 +25,11 @@ namespace qtype_pmatch\output;
  */
 class mobile {
 
+    /**
+     * Returns the data for the mobile view.
+     *
+     * @return array The data for the mobile view.
+     */
     public static function pmatch_view() {
         global $CFG;
         // General notes:
@@ -36,10 +41,10 @@ class mobile {
             'templates' => [
                 [
                     'id' => 'main',
-                    'html' => file_get_contents($CFG->dirroot . '/question/type/pmatch/mobile/pmatch.html')
+                    'html' => file_get_contents($CFG->dirroot . '/question/type/pmatch/mobile/pmatch.html'),
                 ],
             ],
-            'javascript' => file_get_contents($CFG->dirroot . '/question/type/pmatch/mobile/pmatch.js')
+            'javascript' => file_get_contents($CFG->dirroot . '/question/type/pmatch/mobile/pmatch.js'),
         ];
     }
 }

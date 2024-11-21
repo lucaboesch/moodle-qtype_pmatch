@@ -17,7 +17,7 @@
 namespace qtype_pmatch;
 
 /**
- * Class to store options for {@link \qtype_pmatch\testquestion_controller}.
+ * Class to store options for {@see \qtype_pmatch\testquestion_controller}.
  * Design references are: mod_quiz\local\reports\attempts_report_options, quiz_overview_options.
  *
  * @package   qtype_pmatch
@@ -36,7 +36,7 @@ class testquestion_options {
             'statematches' => \qtype_pmatch\testquestion_response::MATCHED,
             'statemissedpositive' => \qtype_pmatch\testquestion_response::MISSED_POSITIVE,
             'statemissednegative' => \qtype_pmatch\testquestion_response::MISSED_NEGATIVE,
-            'stateungraded' => \qtype_pmatch\testquestion_response::UNGRADED
+            'stateungraded' => \qtype_pmatch\testquestion_response::UNGRADED,
     ];
 
     /**
@@ -44,7 +44,7 @@ class testquestion_options {
      *      no restriction.
      */
     public $states = [\qtype_pmatch\testquestion_response::MATCHED, \qtype_pmatch\testquestion_response::MISSED_POSITIVE,
-            \qtype_pmatch\testquestion_response::MISSED_NEGATIVE, \qtype_pmatch\testquestion_response::UNGRADED];
+            \qtype_pmatch\testquestion_response::MISSED_NEGATIVE, \qtype_pmatch\testquestion_response::UNGRADED, ];
 
     /** @var int Number of attempts to show per page. */
     public $pagesize = \qtype_pmatch\testquestion_controller::DEFAULT_PAGE_SIZE;
@@ -57,13 +57,18 @@ class testquestion_options {
 
     /**
      * Constructor.
+     *
      * @param object $question the settings for the question being reported on.
-     * @param object $context the context object for the question being reported on.
      */
     public function __construct($question) {
         $this->question = $question;
     }
 
+    /**
+     * Get the URL parameters that represent the current state of this object.
+     *
+     * @return array The URL parameters.
+     */
     protected function get_url_params() {
         $params = [];
         $params['id'] = $this->question->id;
@@ -73,6 +78,11 @@ class testquestion_options {
         return $params;
     }
 
+    /**
+     * Get the initial data to populate the settings form.
+     *
+     * @return \stdClass The initial form data.
+     */
     public function get_initial_form_data() {
         $toform = new \stdClass();
         $toform->pagesize   = $this->pagesize;
@@ -84,6 +94,12 @@ class testquestion_options {
         return $toform;
     }
 
+    /**
+     * Set up this preferences object using data from a form.
+     *
+     * @param stdClass $fromform data from the form.
+     * @return void
+     */
     public function setup_from_form_data($fromform) {
         $this->pagesize   = $fromform->pagesize;
         $this->states = [];
@@ -94,6 +110,12 @@ class testquestion_options {
         }
     }
 
+    /**
+     * Set up this preferences object using optional_param.
+     *
+     * @return void
+     * @throws \coding_exception
+     */
     public function setup_from_params() {
         $this->pagesize = optional_param('pagesize', $this->pagesize, PARAM_INT);
         $states = optional_param('states', '', PARAM_ALPHAEXT);

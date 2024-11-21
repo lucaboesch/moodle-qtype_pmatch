@@ -48,7 +48,7 @@ class qtype_pmatch_external extends external_api {
     public static function check_response_returns() {
         return new external_single_structure([
                 'status' => new external_value(PARAM_ALPHA, 'Status when check'),
-                'message' => new external_value(PARAM_RAW, 'The error message', VALUE_OPTIONAL)
+                'message' => new external_value(PARAM_RAW, 'The error message', VALUE_OPTIONAL),
         ]);
     }
 
@@ -64,7 +64,7 @@ class qtype_pmatch_external extends external_api {
         $result['status'] = 'success';
         $params = self::validate_parameters(self::check_response_parameters(), [
                 'questionid' => $questionid,
-                'response' => $response]);
+                'response' => $response, ]);
         $duplicated = \qtype_pmatch\testquestion_responses::check_duplicate_response($params['questionid'], $params['response']);
         if ($duplicated) {
             $result['status'] = 'error';
@@ -103,7 +103,7 @@ class qtype_pmatch_external extends external_api {
                         'misspositive' => new external_value(PARAM_INT, '', VALUE_OPTIONAL),
                         'missnegative' => new external_value(PARAM_INT, '', VALUE_OPTIONAL),
                         'accuracy' => new external_value(PARAM_INT, '', VALUE_OPTIONAL),
-                ])
+                ]),
         ]);
     }
 
@@ -123,7 +123,7 @@ class qtype_pmatch_external extends external_api {
                 'questionid' => $questionid,
                 'expectedfraction' => $expectedfraction,
                 'response' => $response,
-                'curentrow' => $curentrow]);
+                'curentrow' => $curentrow, ]);
         $question = question_bank::load_question($params['questionid']);
         // To prevent notice message when calling web service.
         $PAGE->set_context($question->get_context());

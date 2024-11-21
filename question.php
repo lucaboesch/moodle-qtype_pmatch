@@ -37,7 +37,7 @@ require_once($CFG->dirroot.'/question/type/pmatch/pmatchlib.php');
 class qtype_pmatch_question extends question_graded_by_strategy
         implements question_response_answer_comparer {
 
-    /** @var boolean whether answers should be graded case-sensitively. */
+    /** @var bool whether answers should be graded case-sensitively. */
     public $usecase;
 
     /** @var string add more words to the dictionary. */
@@ -51,16 +51,16 @@ class qtype_pmatch_question extends question_graded_by_strategy
      * but this gets set because of extra_question_fields() so we need to declare it. */
     public $converttospace;
 
-    /** @var boolean whether to allow students to use subscript. */
+    /** @var bool whether to allow students to use subscript. */
     public $allowsubscript;
 
-    /** @var boolean whether to allow students to use super script. */
+    /** @var bool whether to allow students to use super script. */
     public $allowsuperscript;
 
-    /** @var boolean whether to warn student if their response is longer than 20 words. */
+    /** @var bool whether to warn student if their response is longer than 20 words. */
     public $forcelength;
 
-    /** @var boolean whether to spell check students response. */
+    /** @var bool whether to spell check students response. */
     public $applydictionarycheck;
 
     /** @var string to be used for 'Preview question' and 'Answer sheet' in print. */
@@ -75,15 +75,28 @@ class qtype_pmatch_question extends question_graded_by_strategy
     /** @var array of question_answer. */
     public $answers = [];
 
-
+    /**
+     * Constructor.
+     */
     public function __construct() {
         parent::__construct(new question_first_matching_answer_grading_strategy($this));
     }
 
+    /**
+     * Get the expected data for the response.
+     *
+     * @return array The expected data.
+     */
     public function get_expected_data() {
         return ['answer' => PARAM_RAW_TRIMMED];
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param array $response the response
+     * @return mixed|string|null a plain text summary of that response, that could be used in reports.
+     */
     public function summarise_response(array $response) {
         if (isset($response['answer'])) {
             return $response['answer'];
@@ -92,6 +105,12 @@ class qtype_pmatch_question extends question_graded_by_strategy
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param array $response the response
+     * @return bool whether the response can be graded.
+     */
     public function is_gradable_response(array $response) {
         if (!array_key_exists('answer', $response) || ((!$response['answer']) && $response['answer'] !== '0')) {
             return false;
@@ -100,6 +119,12 @@ class qtype_pmatch_question extends question_graded_by_strategy
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param array $response the response
+     * @return bool whether this response is a complete answer to this question.
+     */
     public function is_complete_response(array $response) {
         if ($this->is_gradable_response($response)) {
             return (count($this->validate($response)) === 0);
@@ -108,6 +133,13 @@ class qtype_pmatch_question extends question_graded_by_strategy
         }
     }
 
+    /**
+     * Validate the response.
+     *
+     * @param array $response the response
+     * @return array the validation errors.
+     * @throws coding_exception
+     */
     protected function validate(array $response) {
         $responsevalidationerrors = [];
 
@@ -134,6 +166,13 @@ class qtype_pmatch_question extends question_graded_by_strategy
         return $responsevalidationerrors;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param array $response the response
+     * @return lang_string|mixed|string|null the message.
+     * @throws coding_exception
+     */
     public function get_validation_error(array $response) {
         $errors = $this->validate($response);
         if (count($errors) === 1) {
@@ -144,15 +183,34 @@ class qtype_pmatch_question extends question_graded_by_strategy
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param array $prevresponse the responses previously recorded for this question.
+     * @param array $newresponse the new responses, in the same format.
+     * @return bool whether the two sets of responses are the same
+     */
     public function is_same_response(array $prevresponse, array $newresponse) {
         return question_utils::arrays_same_at_key_missing_is_blank(
                 $prevresponse, $newresponse, 'answer');
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @return array of question answers.
+     */
     public function get_answers() {
         return $this->answers;
     }
 
+    /**
+     * Compare a response with an answer.
+     *
+     * @param array $response the response
+     * @param question_answer $answer the answer
+     * @return bool whether the response matches the answer
+     */
     public function compare_response_with_answer(array $response, question_answer $answer) {
         if ($answer->answer == '*') {
             return true;
@@ -167,12 +225,26 @@ class qtype_pmatch_question extends question_graded_by_strategy
                                                             $this->pmatchoptions);
     }
 
+    /**
+     * Compare a string with a pmatch expression.
+     *
+     * @param string $string the string to be matched.
+     * @param string $expression the expression being matched.
+     * @param array $options the options for the pmatch expression.
+     * @return bool whether the string matches the expression.
+     * @throws coding_exception
+     */
     public static function compare_string_with_pmatch_expression($string, $expression, $options) {
         $string = new pmatch_parsed_string($string, $options);
         $expression = new pmatch_expression($expression, $options);
         return $expression->matches($string);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @return string[]|null parameter name => value.
+     */
     public function get_correct_response() {
         if ($this->modelanswer === '' || $this->modelanswer === null) {
             // We don't have a correct answer.
@@ -181,6 +253,17 @@ class qtype_pmatch_question extends question_graded_by_strategy
         return ['answer' => $this->modelanswer];
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param question_attempt $qa the question attempt being displayed.
+     * @param question_display_options $options the options that control display of the question.
+     * @param string $component the name of the component we are serving files for.
+     * @param string $filearea the name of the file area.
+     * @param array $args the remaining bits of the file path.
+     * @param bool $forcedownload whether the user must be forced to download the file.
+     * @return bool true if the user can access this file.
+     */
     public function check_file_access($qa, $options, $component, $filearea, $args, $forcedownload) {
         if ($component == 'question' && $filearea == 'answerfeedback') {
             $currentanswer = $qa->get_last_qt_var('answer');
@@ -197,19 +280,46 @@ class qtype_pmatch_question extends question_graded_by_strategy
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param question_attempt_step $step The question attempt step
+     * @param int $variant which variant of this question to start
+     * @return void
+     * @throws coding_exception
+     */
     public function start_attempt(question_attempt_step $step, $variant) {
         $this->pmatchoptions->lang = $this->applydictionarycheck;
         $step->set_qt_var('_responselang', $this->pmatchoptions->lang);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param question_attempt_step $step The question attempt step
+     * @return void
+     */
     public function apply_attempt_state(question_attempt_step $step) {
         $this->pmatchoptions->lang = $step->get_qt_var('_responselang');
     }
 
+    /**
+     * Get the context of the question.
+     *
+     * @return bool|\core\context the context of the question.
+     * @throws coding_exception
+     */
     public function get_context() {
         return context::instance_by_id($this->contextid);
     }
 
+    /**
+     * Check that current user has the required capability.
+     *
+     * @param string $type the type of capability.
+     * @return bool whether the user has the required capability.
+     * @throws coding_exception
+     */
     protected function has_question_capability($type) {
         global $USER;
         $context = $this->get_context();
@@ -217,6 +327,12 @@ class qtype_pmatch_question extends question_graded_by_strategy
                 ($USER->id == $this->createdby && has_capability("moodle/question:{$type}mine", $context));
     }
 
+    /**
+     * Check that current user can view the question.
+     *
+     * @return bool Whether the user can view the question.
+     * @throws coding_exception
+     */
     public function user_can_view() {
         return $this->has_question_capability('view');
     }

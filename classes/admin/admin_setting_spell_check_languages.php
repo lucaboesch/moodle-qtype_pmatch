@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-
 /**
  * Admin settings class for generate spell-checker dictionaries checkbox.
  *
@@ -38,7 +37,6 @@ require_once($CFG->libdir . '/adminlib.php');
  * @copyright 2019 The Open University
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 class qtype_pmatch_admin_setting_spell_check_languages extends \admin_setting_configmulticheckbox {
 
     /**

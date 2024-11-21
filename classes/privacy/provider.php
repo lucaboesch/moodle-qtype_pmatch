@@ -90,7 +90,7 @@ class provider implements
 
         $preferences = [
                 'allowsubscript',
-                'allowsuperscript'
+                'allowsuperscript',
         ];
         foreach ($preferences as $key) {
             $preference = get_user_preferences("qtype_pmatch_{$key}", null, $userid);

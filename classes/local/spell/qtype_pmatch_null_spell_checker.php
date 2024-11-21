@@ -17,7 +17,7 @@
 namespace qtype_pmatch\local\spell;
 
 /**
- * Implements the {@link qtype_pmatch_spell_checker} by saying that any string is a
+ * Implements the {@see qtype_pmatch_spell_checker} by saying that any string is a
  * correctly spelled word. This can be used when there is no back-end installed.
  *
  * @package qtype_pmatch
@@ -26,14 +26,32 @@ namespace qtype_pmatch\local\spell;
  */
 class qtype_pmatch_null_spell_checker extends qtype_pmatch_spell_checker {
 
+    /**
+     * {@inheritdoc}
+     *
+     * @param string $word The word to check.
+     * @return bool whether the word is in the dictionary.
+     */
     public function is_in_dictionary($word) {
         return true;
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @return string translated name of this back-end, for use in the UI.
+     * @return \lang_string|string
+     * @throws \coding_exception
+     */
     public static function get_name() {
         return get_string('spellcheckernull', 'qtype_pmatch');
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @return bool whether the necessary libraries are installed for this back-end to work.
+     */
     public static function is_available() {
         return true;
     }

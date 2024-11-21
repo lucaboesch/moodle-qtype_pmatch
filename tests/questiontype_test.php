@@ -32,15 +32,32 @@ require_once($CFG->dirroot . '/question/type/pmatch/questiontype.php');
  *
  * @covers \qtype_pmatch
  */
-class questiontype_test extends \basic_testcase {
+final class questiontype_test extends \basic_testcase {
+    /**
+     * @var string[] List of files to include in code coverage analysis.
+     */
     public static $includecoverage = ['question/type/questiontype.php',
-                                        'question/type/pmatch/questiontype.php'];
+                                        'question/type/pmatch/questiontype.php', ];
+    /**
+     * @var \qtype_pmatch The question type instance.
+     */
     protected $qtype;
 
+    /**
+     * Set up the test.
+     *
+     * @return void
+     */
     protected function setUp(): void {
+        parent::setUp();
         $this->qtype = new \qtype_pmatch();
     }
 
+    /**
+     * Get the test question data.
+     *
+     * @return \stdClass
+     */
     protected function get_test_question_data(): \stdClass {
         $q = new \stdClass();
         $q->id = 1;
@@ -51,27 +68,47 @@ class questiontype_test extends \basic_testcase {
         return $q;
     }
 
-    public function test_name() {
+    /**
+     * Test the name.
+     *
+     * @return void
+     */
+    public function test_name(): void {
         $this->assertEquals('pmatch', $this->qtype->name());
     }
 
-    public function test_can_analyse_responses() {
+    /**
+     * Test can_analyse_responses
+     *
+     * @return void
+     */
+    public function test_can_analyse_responses(): void {
         $this->assertTrue($this->qtype->can_analyse_responses());
     }
 
-    public function test_get_random_guess_score() {
+    /**
+     * Test get_random_guess_score
+     *
+     * @return void
+     */
+    public function test_get_random_guess_score(): void {
         $q = $this->get_test_question_data();
         $this->assertEquals(0, $this->qtype->get_random_guess_score($q));
     }
 
-    public function test_get_possible_responses() {
+    /**
+     * Test get possible responses
+     *
+     * @return void
+     */
+    public function test_get_possible_responses(): void {
         $q = $this->get_test_question_data();
 
         $this->assertEquals([
             $q->id => [
                 1 => new question_possible_response('match(frog)', 1),
                 2 => new question_possible_response('*', 0),
-                null => question_possible_response::no_response()],
+                null => question_possible_response::no_response(), ],
         ], $this->qtype->get_possible_responses($q));
     }
 }

@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-
 /**
  * This file containscode to match an already interpreted a pmatch expression to a student
  * response.
@@ -26,6 +25,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * This file contains the classes that are used to match a pmatch expression to a student response.
+ */
 interface pmatch_word_delimiter {
     /**
      *
@@ -35,50 +37,67 @@ interface pmatch_word_delimiter {
      *
      * @param array $phrase the words that are being matched
      * @param array $wordsmatched index no of words that have been matched so far
-     * @param integer $wordtotry word we want to know if it is in the right position to match
+     * @param int $wordtotry word we want to know if it is in the right position to match
      * @param pmatch_phrase_level_options $phraseleveloptions
-     * @return boolean
+     * @return bool
      */
     public function valid_match($phrase, $wordsmatched, $wordtotry, $phraseleveloptions);
 
     /**
-     *
      * A hook to override allow any word order in word delimiter that precedes a phrase.
+     *
+     * @param bool $allowanywordorder whether to allow any word order
      */
     public function allow_any_word_order_in_adjacent_phrase($allowanywordorder);
     /**
      *
      * Does this word delimiter also require intervening words between matched word to not be
      * matched by other words in expression?
-     * @return boolean
+     *
+     * @return bool true if this word delimiter also require intervening words
      */
     public function also_match_intervening_words();
 }
+
+/**
+ * This interface is used to determine if a phrase can match a character.
+ */
 interface pmatch_can_match_char {
     /**
      * Can possibly match a char.
      * @param string $char a character
-     * @return boolean successful match?
+     * @return bool successful match?
      */
     public function match_char($char);
 }
+
+/**
+ * This interface is used to determine if a phrase can match multiple characters or no characters.
+ */
 interface pmatch_can_match_multiple_or_no_chars {
     /**
      * Can possibly match some characters.
      * @param string $chars some characters to match
-     * @return boolean successful match?
+     * @return bool successful match?
      */
     public function match_chars($chars);
 }
+/**
+ * This interface is used to determine if a phrase can match a word.
+ */
 interface pmatch_can_match_word {
     /**
      * Can possibly match a word.
      * @param array $word a word
      * @param pmatch_word_level_options $wordleveloptions
-     * @return boolean successful match?
+     * @return bool successful match?
      */
     public function match_word($word, $wordleveloptions);
 }
+
+/**
+ * This interface is used to determine if a phrase can match a phrase.
+ */
 interface pmatch_can_match_phrase {
     /**
      *
@@ -86,22 +105,29 @@ interface pmatch_can_match_phrase {
      * @param array $phrase array of words
      * @param pmatch_phrase_level_options $phraseleveloptions
      * @param pmatch_word_level_options $wordleveloptions
-     * @return boolean successful match?
+     * @return bool successful match?
      */
     public function match_phrase($phrase, $phraseleveloptions, $wordleveloptions);
 
 }
+
+/**
+ * This interface is used to determine if a phrase can match a whole expression.
+ */
 interface pmatch_can_match_whole_expression {
     /**
      *
      * Can possibly match the whole expression.
-     * @param array $phrase array of words
-     * @return boolean successful match?
+     * @param array $words array of words
+     * @return bool successful match?
      */
     public function match_whole_expression($words);
 
 }
 
+/**
+ * This interface is used to determine how many words a phrase can match.
+ */
 interface pmatch_can_contribute_to_length_of_phrase {
     /**
      *
@@ -114,6 +140,9 @@ interface pmatch_can_contribute_to_length_of_phrase {
 
 }
 
+/**
+ * This class is used to match an item.
+ */
 abstract class pmatch_matcher_item {
     /** @var pmatch_interpreter_item */
     protected $interpreter;
@@ -140,12 +169,26 @@ abstract class pmatch_matcher_item {
         $typeobj->codefragment = $this->interpreter->get_code_fragment();
         return $typeobj;
     }
+
+    /**
+     * Get the type name of an object.
+     *
+     * @param stdClass $object
+     * @return string
+     */
     public function get_type_name($object) {
         return core_text::substr(get_class($object), 15);
     }
 }
+
+/**
+ * This class is used to match items with subcontents.
+ */
 abstract class pmatch_matcher_item_with_subcontents extends pmatch_matcher_item {
 
+    /**
+     * @var array of subcontents
+     */
     protected $subcontents = [];
 
     /** @var pmatch_word_level_options */
@@ -155,9 +198,10 @@ abstract class pmatch_matcher_item_with_subcontents extends pmatch_matcher_item 
     protected $phraseleveloptions;
 
     /**
-     *
      * Create a tree of matcher items.
+
      * @param pmatch_interpreter_item_with_subcontents $interpreter
+     * @param pmatch_options $externaloptions
      */
     public function __construct($interpreter, $externaloptions) {
         parent::__construct($interpreter, $externaloptions);
@@ -184,7 +228,7 @@ abstract class pmatch_matcher_item_with_subcontents extends pmatch_matcher_item 
      *
      * This property controls whether extra words are matched on the beginning and end of a phrase
      * when the extra words option is enabled for the expression.
-     * @var boolean
+     * @var bool
      */
     protected $greedyphrasematch = false;
 
@@ -193,7 +237,7 @@ abstract class pmatch_matcher_item_with_subcontents extends pmatch_matcher_item 
      * @param array $phrase Array of words
      * @param pmatch_phrase_level_options $phraseleveloptions
      * @param pmatch_word_level_options $wordleveloptions
-     * @return boolean Successfully matched?
+     * @return bool Successfully matched?
      */
     public function match_phrase($phrase, $phraseleveloptions, $wordleveloptions) {
         $this->phraseleveloptions = $phraseleveloptions;
@@ -216,10 +260,10 @@ abstract class pmatch_matcher_item_with_subcontents extends pmatch_matcher_item 
      * well as for the whole expression in match_options. This is a recursive function that can be
      * started by just calling it with the phrase to check and leaving other params as the default.
      * @param array $phrase
-     * @param integer $itemtotry
-     * @param integer $wordtotry
+     * @param int $itemtotry
+     * @param int $wordtotry
      * @param array $wordsmatched
-     * @return boolean found a match?
+     * @return bool found a match?
      */
     protected function check_match_phrase_branch($phrase, $itemtotry = 0, $wordtotry = 0,
                                                                         $wordsmatched = []) {
@@ -358,27 +402,57 @@ abstract class pmatch_matcher_item_with_subcontents extends pmatch_matcher_item 
 }
 
 
+/**
+ * This class is used to match a whole expression.
+ */
 class pmatch_matcher_whole_expression extends pmatch_matcher_item_with_subcontents
                                                 implements pmatch_can_match_whole_expression {
+    /**
+     * {@inheritDoc}
+     *
+     * @param array $words array of words
+     * @return bool successful match?
+     */
     public function match_whole_expression($words) {
         return $this->subcontents[0]->match_whole_expression($words);
     }
 }
 
 
+/**
+ * This class is used not to match.
+ */
 class pmatch_matcher_not extends pmatch_matcher_item_with_subcontents {
+    /**
+     * {@inheritDoc}
+     *
+     * @param array $words array of words
+     * @return bool successful match?
+     */
     public function match_whole_expression($words) {
         return !$this->subcontents[0]->match_whole_expression($words);
     }
 }
 
 
+/**
+ * This class is used to match .
+ */
 class pmatch_matcher_match extends pmatch_matcher_item_with_subcontents {
 }
 
 
+/**
+ * This class is used to match any.
+ */
 class pmatch_matcher_match_any extends pmatch_matcher_match
                                 implements pmatch_can_match_whole_expression {
+    /**
+     * {@inheritDoc}
+     *
+     * @param array $words array of words
+     * @return bool successful match?
+     */
     public function match_whole_expression($words) {
         foreach ($this->subcontents as $subcontent) {
             if ($subcontent->match_whole_expression($words)) {
@@ -390,8 +464,17 @@ class pmatch_matcher_match_any extends pmatch_matcher_match
 }
 
 
+/**
+ * This class is used to match all.
+ */
 class pmatch_matcher_match_all extends pmatch_matcher_match
         implements  pmatch_can_match_whole_expression {
+    /**
+     * {@inheritDoc}
+     *
+     * @param array $words array of words
+     * @return bool successful match?
+     */
     public function match_whole_expression($words) {
         foreach ($this->subcontents as $subcontent) {
             if (!$subcontent->match_whole_expression($words)) {
@@ -403,6 +486,9 @@ class pmatch_matcher_match_all extends pmatch_matcher_match
 }
 
 
+/**
+ * This class is used to match options.
+ */
 class pmatch_matcher_match_options extends pmatch_matcher_match
         implements pmatch_can_match_phrase, pmatch_can_contribute_to_length_of_phrase,
                     pmatch_can_match_whole_expression {
@@ -412,13 +498,28 @@ class pmatch_matcher_match_options extends pmatch_matcher_match
     /** @var pmatch_phrase_level_options */
     public $phraseleveloptions;
 
+    /**
+     * @var bool Greedy match the phrase.
+     */
     protected $greedyphrasematch = true;
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param array $words array of words
+     * @return bool successful match?
+     */
     public function match_whole_expression($words) {
         return $this->match_phrase($words, $this->interpreter->phraseleveloptions,
                                     $this->interpreter->wordleveloptions);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param pmatch_phrase_level_options $phraseleveloptions
+     * @return array with two values, minimum and maximum.
+     */
     public function can_match_len($phraseleveloptions) {
         $min = 0;
         $max = 0;
@@ -439,10 +540,20 @@ class pmatch_matcher_match_options extends pmatch_matcher_match
 }
 
 
+/**
+ * This class is used to match .
+ */
 class pmatch_matcher_or_list extends pmatch_matcher_item_with_subcontents
         implements pmatch_can_match_phrase, pmatch_can_match_word,
                     pmatch_can_contribute_to_length_of_phrase {
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param array $word a word
+     * @param pmatch_word_level_options $wordleveloptions
+     * @return bool successful match?
+     */
     public function match_word($word, $wordleveloptions) {
         foreach ($this->subcontents as $subcontent) {
             if ($subcontent instanceof pmatch_can_match_word &&
@@ -453,6 +564,14 @@ class pmatch_matcher_or_list extends pmatch_matcher_item_with_subcontents
         return false;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param array $phrase array of words
+     * @param pmatch_phrase_level_options $phraseleveloptions
+     * @param pmatch_word_level_options $wordleveloptions
+     * @return bool successful match?
+     */
     public function match_phrase($phrase, $phraseleveloptions, $wordleveloptions) {
         foreach ($this->subcontents as $subcontent) {
             if ($subcontent instanceof pmatch_can_match_phrase &&
@@ -463,6 +582,12 @@ class pmatch_matcher_or_list extends pmatch_matcher_item_with_subcontents
         return false;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param pmatch_phrase_level_options $phraseleveloptions
+     * @return array with two values, minimum and maximum.
+     */
     public function can_match_len($phraseleveloptions) {
         $min = 1;
         $max = 1;
@@ -489,17 +614,27 @@ class pmatch_matcher_or_list extends pmatch_matcher_item_with_subcontents
 class pmatch_matcher_synonym extends pmatch_matcher_item_with_subcontents
         implements pmatch_can_match_word, pmatch_can_contribute_to_length_of_phrase {
 
+    /**
+     * @var bool whether to use the misspelled words.
+     */
     protected $usedmisspellings;
 
     /**
      * Called after running match_word or match_phrase. This function returns the minimum number of
      * mispellings used to match the student response word to the pmatch expression.
-     * @return integer the number of misspellings found.
+     * @return int the number of misspellings found.
      */
     public function get_used_misspellings() {
         return $this->usedmisspellings;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param array $word a word
+     * @param pmatch_word_level_options $wordleveloptions
+     * @return bool successful match?
+     */
     public function match_word($word, $wordleveloptions) {
         // phpcs:disable Squiz.ControlStructures.ForLoopDeclaration.SpacingAfterFirst
         // phpcs:disable Squiz.ControlStructures.ForLoopDeclaration.SpacingAfterSecond
@@ -520,19 +655,39 @@ class pmatch_matcher_synonym extends pmatch_matcher_item_with_subcontents
         return false;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param pmatch_phrase_level_options $phraseleveloptions
+     * @return array with two values, minimum and maximum.
+     */
     public function can_match_len($phraseleveloptions) {
         return [1, 1];
     }
 }
 
 
+/**
+ * This class is used to match .
+ */
 class pmatch_matcher_or_character extends pmatch_matcher_item {
 
 }
 
 
+/**
+ * This class is used to match .
+ */
 class pmatch_matcher_or_list_phrase extends pmatch_matcher_item_with_subcontents
             implements pmatch_can_match_phrase, pmatch_can_contribute_to_length_of_phrase {
+    /**
+     * {@inheritDoc}
+     *
+     * @param string $phrase a word
+     * @param pmatch_phrase_level_options $phraseleveloptions
+     * @param pmatch_word_level_options $wordleveloptions
+     * @return bool successful match?
+     */
     public function match_phrase($phrase, $phraseleveloptions, $wordleveloptions) {
         foreach ($this->subcontents as $subcontent) {
             if ($subcontent instanceof pmatch_can_match_phrase &&
@@ -543,6 +698,12 @@ class pmatch_matcher_or_list_phrase extends pmatch_matcher_item_with_subcontents
         return false;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param pmatch_phrase_level_options $phraseleveloptions
+     * @return array with two values, minimum and maximum.
+     */
     public function can_match_len($phraseleveloptions) {
         $subcontent = reset($this->subcontents);
         return $subcontent->can_match_len($phraseleveloptions);
@@ -550,9 +711,18 @@ class pmatch_matcher_or_list_phrase extends pmatch_matcher_item_with_subcontents
 }
 
 
+/**
+ * This class is used to match phrases.
+ */
 class pmatch_matcher_phrase extends pmatch_matcher_item_with_subcontents
         implements pmatch_can_match_phrase, pmatch_can_contribute_to_length_of_phrase {
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param pmatch_phrase_level_options $phraseleveloptions
+     * @return array with two values, minimum and maximum.
+     */
     public function can_match_len($phraseleveloptions) {
         $noofwords = (count($this->subcontents) + 1) / 2;
         if ($phraseleveloptions->get_allow_extra_words()) {
@@ -564,9 +734,21 @@ class pmatch_matcher_phrase extends pmatch_matcher_item_with_subcontents
 }
 
 
+/**
+ * This class is used to match word delimiters that are spaces.
+ */
 class pmatch_matcher_word_delimiter_space extends pmatch_matcher_item
         implements pmatch_word_delimiter, pmatch_can_contribute_to_length_of_phrase {
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param array $phrase the words that are being matched
+     * @param array $wordsmatched index no of words that have been matched so far
+     * @param int $wordtotry word we want to know if it is in the right position to match
+     * @param pmatch_phrase_level_options $phraseleveloptions
+     * @return bool
+     */
     public function valid_match($phrase, $wordsmatched, $wordtotry, $phraseleveloptions) {
         $lastwordmatched = $wordsmatched[count($wordsmatched) - 1];
         if (!$phraseleveloptions->get_allow_any_word_order() &&
@@ -579,6 +761,12 @@ class pmatch_matcher_word_delimiter_space extends pmatch_matcher_item
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param pmatch_phrase_level_options $phraseleveloptions
+     * @return array with two values, minimum and maximum.
+     */
     public function can_match_len($phraseleveloptions) {
         if ($phraseleveloptions->get_allow_extra_words()) {
             return [0, null];
@@ -587,19 +775,42 @@ class pmatch_matcher_word_delimiter_space extends pmatch_matcher_item
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param bool $allowanywordorder whether to allow any word order
+     * @return false
+     */
     public function allow_any_word_order_in_adjacent_phrase($allowanywordorder) {
         return $allowanywordorder;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @return bool true if this word delimiter also require intervening words
+     */
     public function also_match_intervening_words() {
         return false;
     }
 }
 
 
+/**
+ * This class is used to match word delimiters that are not spaces.
+ */
 class pmatch_matcher_word_delimiter_proximity extends pmatch_matcher_item
         implements pmatch_word_delimiter, pmatch_can_contribute_to_length_of_phrase {
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param array $phrase the words that are being matched
+     * @param array $wordsmatched index no of words that have been matched so far
+     * @param int $wordtotry word we want to know if it is in the right position to match
+     * @param pmatch_phrase_level_options $phraseleveloptions
+     * @return bool
+     */
     public function valid_match($phrase, $wordsmatched, $wordtotry, $phraseleveloptions) {
         $lastwordmatched = $wordsmatched[count($wordsmatched) - 1];
         if ($wordtotry < $lastwordmatched) {
@@ -621,6 +832,12 @@ class pmatch_matcher_word_delimiter_proximity extends pmatch_matcher_item
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param pmatch_phrase_level_options $phraseleveloptions
+     * @return array with two values, minimum and maximum.
+     */
     public function can_match_len($phraseleveloptions) {
         if ($phraseleveloptions->get_allow_extra_words()) {
             return [0, $phraseleveloptions->get_allow_proximity_of()];
@@ -629,19 +846,40 @@ class pmatch_matcher_word_delimiter_proximity extends pmatch_matcher_item
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param bool $allowanywordorder whether to allow any word order
+     * @return false
+     */
     public function allow_any_word_order_in_adjacent_phrase($allowanywordorder) {
         return false;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @return bool if this word delimiter also require intervening words
+     */
     public function also_match_intervening_words() {
         return true;
     }
 }
 
 
+/**
+ * This class is used to match a number.
+ */
 class pmatch_matcher_number extends pmatch_matcher_item
             implements pmatch_can_match_word {
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param array $word a word
+     * @param pmatch_word_level_options $wordleveloptions
+     * @return bool successful match?
+     */
     public function match_word($word, $wordleveloptions) {
         $word = $this->externaloptions->strip_sentence_divider($word);
         if (0 === preg_match('~'.PMATCH_NUMBER.'$~A', $word)) {
@@ -658,6 +896,9 @@ class pmatch_matcher_number extends pmatch_matcher_item
      * Take a string that is part of the pmatch expression or that the student has entered
      * and clean it up into a format that php understands then cast it as a float and
      * return it.
+     *
+     * @param string $numberstr The string to clean up.
+     * @return float The cleaned up number.
      */
     public function cleanup_number($numberstr) {
         $numberstr = str_replace(' ', '', $numberstr);
@@ -666,11 +907,15 @@ class pmatch_matcher_number extends pmatch_matcher_item
     }
 }
 
-
+/**
+ * This class is used to match a word.
+ */
 class pmatch_matcher_word extends pmatch_matcher_item_with_subcontents
         implements pmatch_can_match_word, pmatch_can_contribute_to_length_of_phrase {
 
     /**
+     * Check the word level options and disable some options if the word is too short.
+     *
      * @param pmatch_word_level_options $wordleveloptions
      * @return pmatch_word_level_options word level options with some options
      *      disabled if word too short.
@@ -698,6 +943,13 @@ class pmatch_matcher_word extends pmatch_matcher_item_with_subcontents
         return $adjustedwordleveloptions;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param array $word a word
+     * @param pmatch_word_level_options $wordleveloptions
+     * @return bool successful match?
+     */
     public function match_word($word, $wordleveloptions) {
         $word = $this->externaloptions->strip_sentence_divider($word);
         $this->wordleveloptions = $this->check_word_level_options($wordleveloptions);
@@ -711,10 +963,11 @@ class pmatch_matcher_word extends pmatch_matcher_item_with_subcontents
      * Check each character against each item and iterate down branches of possible matches to whole
      * word.
      * @param string $word word to match from student response
-     * @param integer $charpos position of character in word we are currently checking for a match
-     * @param integer $subcontentno subcontent item to match this character against
-     * @param integer $noofcharactertomatch no of characters to match
-     * @return boolean true if we find one match branch that successfully matches the whole word
+     * @param bool $allowmispellings whether to allow misspellings
+     * @param int $charpos position of character in word we are currently checking for a match
+     * @param int $subcontentno subcontent item to match this character against
+     * @param int $noofcharactertomatch no of characters to match
+     * @return bool true if we find one match branch that successfully matches the whole word
      */
     private function check_match_branches($word, $allowmispellings,
                                             $charpos = 0, $subcontentno = 0,
@@ -772,7 +1025,7 @@ class pmatch_matcher_word extends pmatch_matcher_item_with_subcontents
         }
         if ((!$thisfragmentmatched) && ($allowmispellings > 0)) {
             // If there is no match but we can match the next character.
-            if ($this->wordleveloptions->get_misspelling_allow_transpose_two_chars()&&
+            if ($this->wordleveloptions->get_misspelling_allow_transpose_two_chars() &&
                         ($itemslefttomatch > 0) && ($charslefttomatch > 0)) {
                 if (!$this->subcontents[$subcontentno + 1]
                                             instanceof pmatch_can_match_multiple_or_no_chars) {
@@ -833,15 +1086,30 @@ class pmatch_matcher_word extends pmatch_matcher_item_with_subcontents
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param pmatch_phrase_level_options $phraseleveloptions
+     * @return array with two values, minimum and maximum.
+     */
     public function can_match_len($phraseleveloptions) {
         return [1, 1];
     }
 }
 
 
+/**
+ * Match a character in a word.
+ */
 class pmatch_matcher_character_in_word extends pmatch_matcher_item
         implements pmatch_can_match_char {
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param string $character a character
+     * @return bool successful match?
+     */
     public function match_char($character) {
         $codefragment = $this->interpreter->get_code_fragment();
         if ($this->externaloptions->ignorecase) {
@@ -853,8 +1121,17 @@ class pmatch_matcher_character_in_word extends pmatch_matcher_item
 }
 
 
+/**
+ * Match a special character in a word.
+ */
 class pmatch_matcher_special_character_in_word extends pmatch_matcher_item
                                                 implements pmatch_can_match_char {
+    /**
+     * {@inheritDoc}
+     *
+     * @param string $character a character
+     * @return bool successful match?
+     */
     public function match_char($character) {
         $codefragment = $this->interpreter->get_code_fragment();
         return ($character == $codefragment[1]);
@@ -862,18 +1139,35 @@ class pmatch_matcher_special_character_in_word extends pmatch_matcher_item
 }
 
 
+/**
+ * Match single item
+ */
 class pmatch_matcher_wildcard_match_single extends pmatch_matcher_item
                                             implements pmatch_can_match_char {
+    /**
+     * Match a character.
+     *
+     * @param string $character the character to match
+     * @return true
+     */
     public function match_char($character) {
         return true;
     }
 }
 
-
+/**
+ * Match multiple items
+ */
 class pmatch_matcher_wildcard_match_multiple
             extends pmatch_matcher_item
             implements pmatch_can_match_multiple_or_no_chars {
 
+    /**
+     * Match any number of characters.
+     *
+     * @param string $characters the characters to match
+     * @return true
+     */
     public function match_chars($characters) {
         return true;
     }

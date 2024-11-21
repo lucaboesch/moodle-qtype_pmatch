@@ -96,9 +96,9 @@ class form_utils {
     /**
      * Check whether any char of the first string appear in the second string.
      *
-     * @param string $fiststring
-     * @param string $secondstring
-     * @return string
+     * @param string $firststring First string.
+     * @param string $secondstring Second string.
+     * @return string The first char that appears in both strings.
      */
     public static function find_char_in_both_strings($firststring, $secondstring) {
         if (empty($firststring)) {
@@ -189,7 +189,7 @@ class form_utils {
      * @param \moodleform $editform
      * @param \MoodleQuickForm $mform
      * @param \stdClass $question Question's information.
-     * @param boolean $showheader Show/hide synonyms header.
+     * @param bool $showheader Show/hide synonyms header.
      * @param string $elementname Element name.
      * @param int $repeatwhenempty Number of synonyms field will be shown when no synonyms inserted.
      * @param int $repeatwhenexist Number of synonyms field will be shown when synonyms existed.
@@ -207,7 +207,7 @@ class form_utils {
         $textboxgroup[] = $mform->createElement('group', $elementname,
                 get_string('synonymsno', 'qtype_pmatch', '{no}'), self::add_synonym($mform));
         $repeatedoptions = ['synonymsdata[word]' => ['type' => PARAM_RAW],
-                'synonymsdata[synonyms]' => ['type' => PARAM_RAW]];
+                'synonymsdata[synonyms]' => ['type' => PARAM_RAW], ];
 
         if (isset($question->options)) {
             $countsynonyms = count($question->options->synonyms);
@@ -285,6 +285,12 @@ class form_utils {
         return $expression->get_parse_error();
     }
 
+    /**
+     * Initialise the JavaScript for the pmatch form.
+     *
+     * @return void
+     * @throws \core\exception\coding_exception
+     */
     public static function initialise_pmatch_form_js() {
         global $PAGE;
         $PAGE->requires->js_call_amd('qtype_pmatch/check_valid_expression', 'init');
