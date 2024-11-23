@@ -185,3 +185,4 @@ Feature: Basic test of the question testing tool
     And I should see "Marked correctly: 7 (54%)"
     And I should see "Computed mark greater than human mark: 0 (missed positive)"
     And I should see "Computed mark less than human mark: 5 (missed negative)"
+

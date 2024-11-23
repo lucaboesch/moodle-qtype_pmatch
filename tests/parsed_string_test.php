@@ -125,9 +125,9 @@ final class parsed_string_test extends \basic_testcase {
      *
      * @param array $misspelledwords List of misspelled words
      * @param string $string String to test
-     * @param mixed $options Options, array or pmatch_options
+     * @param ?\mixed $options Options, array or pmatch_options
      */
-    public function test_pmatch_spelling(array $misspelledwords, string $string, mixed $options = null): void {
+    public function test_pmatch_spelling(array $misspelledwords, string $string, ?\mixed $options = null): void {
         if ($options === null) {
             $options = new pmatch_options();
         }
