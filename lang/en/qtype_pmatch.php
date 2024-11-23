@@ -23,6 +23,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+// phpcs:disable moodle.Strings.ForbiddenStrings.Found
 
 $string['add'] = 'Add';
 $string['addmoreanswerblanks'] = 'Blanks for {no} More Answers';
