@@ -166,7 +166,7 @@ class qtype_pmatch_renderer extends qtype_renderer {
         qtype_pmatch_question $question,
         question_display_options $options,
         string $resetbuttonid,
-        string $inputname,
+        string $inputname
     ): string {
         if ($options->readonly || !$question->responsetemplate) {
             return '';
